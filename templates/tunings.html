@@ -8,16 +8,15 @@
     <script src="https://cdn.jsdelivr.net/npm/animejs/lib/anime.min.js"></script>
 {% endblock %}
 {% block content %}
-<section class="hero bg-gray-100 dark:bg-gray-800 py-12 pt-24">
-    <div class="container mx-auto text-center">
-        <h1 class="text-4xl font-bold mb-4 title">♫ TUNING 👽</h1>
-        <p class="text-lg mb-6">Descubre y disfruta de tu música favorita con nosotros.</p>
-    </div>
-</section>
 
 <section class="preview-songs py-12">
     <div class="container mx-auto">
-        <h2 class="text-2xl font-semibold mb-6 text-center">♪ Songs ♫</h2>
+        <section class="hero bg-gray-100 dark:bg-gray-800 py-12 pt-24">
+            <div class="container mx-auto text-center">
+                <h1 class="text-4xl font-bold mb-4 title">♫ TUNING 👽</h1>
+                <p class="text-lg mb-6">Descubre y disfruta de tu música favorita con nosotros.</p>
+            </div>
+        </section>
         <div class="relative tunings-container">
             <!-- Botón Izquierdo -->
             <button class="nav-arrow prev absolute top-1/2 left-0 transform -translate-y-1/2 bg-black bg-opacity-50 p-3 rounded-full text-2xl z-10 hover:bg-opacity-75 transition-all duration-300">←</button>
@@ -140,7 +139,7 @@
             prevButton.addEventListener('click', goToPrev);
 
             // Iniciar el carrusel automáticamente
-            setInterval(goToNext, 35000);
+            setInterval(goToNext, 40000);
 
             // Actualizar el carrusel al redimensionar la ventana
             window.addEventListener('resize', updateCarousel);
@@ -151,6 +150,13 @@
             // Manejar los botones de reproducción
             document.querySelectorAll('.play-button').forEach((button, index) => {
                 button.addEventListener('click', () => {
+                    // Enviar evento a Google Analytics
+                    gtag('event', 'play_song', {
+                        'event_category': 'Music',
+                        'event_label': items[index].querySelector('h3').textContent,
+                        'value': index
+                    });
+
                     const iframe = button.closest('.carousel-item').querySelector('iframe');
                     if (iframe) {
                         // Esperar a que el iframe esté completamente cargado
@@ -161,6 +167,14 @@
                                 playbackStates[index] = !playbackStates[index];
                                 button.textContent = playbackStates[index] ? '❚❚' : '►';
                                 console.log(`Clic simulado en el botón de reproducción/pausa en índice ${index}, estado: ${playbackStates[index] ? 'reproduciendo' : 'pausado'}`);
+
+                                // Enviar mensaje al padre para que main.js lo maneje
+                                window.parent.postMessage({
+                                    type: 'playTrack',
+                                    uri: iframe.src.split('/track/')[1],
+                                    title: items[index].querySelector('h3').textContent,
+                                    artist: items[index].querySelector('p').textContent
+                                }, '*');
                             } else {
                                 console.error(`No se encontró el botón de reproducción/pausa en el iframe en índice ${index}`);
                             }
@@ -174,6 +188,14 @@
                                 playbackStates[index] = !playbackStates[index];
                                 button.textContent = playbackStates[index] ? '❚❚' : '►';
                                 console.log(`Clic simulado en el botón de reproducción/pausa en índice ${index}, estado: ${playbackStates[index] ? 'reproduciendo' : 'pausado'}`);
+
+                                // Enviar mensaje al padre para que main.js lo maneje
+                                window.parent.postMessage({
+                                    type: 'playTrack',
+                                    uri: iframe.src.split('/track/')[1],
+                                    title: items[index].querySelector('h3').textContent,
+                                    artist: items[index].querySelector('p').textContent
+                                }, '*');
                             } else {
                                 console.error(`No se encontró el botón de reproducción/pausa en el iframe en índice ${index}`);
                             }
