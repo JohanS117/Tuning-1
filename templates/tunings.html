@@ -1,0 +1,288 @@
+{% extends 'base.html' %}
+{% block title %}Tuning - Inicio{% endblock %}
+{% block extra_css %}
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/tunings.css') }}">
+    <link href="https://fonts.googleapis.com/css2?family=Pacifico&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Dancing+Script:wght@400;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/animejs/lib/anime.min.js"></script>
+{% endblock %}
+{% block content %}
+<section class="hero bg-gray-100 dark:bg-gray-800 py-12 pt-24">
+    <div class="container mx-auto text-center">
+        <h1 class="text-4xl font-bold mb-4 title">♫ TUNING 👽</h1>
+        <p class="text-lg mb-6">Descubre y disfruta de tu música favorita con nosotros.</p>
+    </div>
+</section>
+
+<section class="preview-songs py-12">
+    <div class="container mx-auto">
+        <h2 class="text-2xl font-semibold mb-6 text-center">♪ Songs ♫</h2>
+        <div class="relative tunings-container">
+            <!-- Botón Izquierdo -->
+            <button class="nav-arrow prev absolute top-1/2 left-0 transform -translate-y-1/2 bg-black bg-opacity-50 p-3 rounded-full text-2xl z-10 hover:bg-opacity-75 transition-all duration-300">←</button>
+
+            <!-- Carrusel -->
+            <div class="carousel-container overflow-hidden">
+                <div class="carousel flex transition-transform duration-500 ease-in-out">
+                    {% if not preview_songs %}
+                        <p class="text-center text-red-500 w-full">No se encontraron canciones para mostrar.</p>
+                    {% else %}
+                        {% for song in preview_songs %}
+                        <div class="carousel-item flex-shrink-0 w-full text-center">
+                            <div class="card bg-white dark:bg-gray-700 p-6 rounded-lg shadow-md mx-auto max-w-sm">
+                                <div class="relative card-image">
+                                    <img src="{{ song.image_url }}" alt="{{ song.title }}" class="w-full h-64 object-cover rounded-md mb-4">
+                                    <button class="play-button absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 text-white text-5xl opacity-50 hover:opacity-100 transition-opacity duration-300">►</button>
+                                </div>
+                                <h3 class="text-lg font-semibold truncate">{{ song.title }}</h3>
+                                <p class="text-gray-600 dark:text-gray-300 truncate mb-4">{{ song.artist }}</p>
+                                <!-- Descripción Emocional -->
+                                <div class="description-bg bg-gray-600 p-4 rounded-md">
+                                    <p class="text-sm text-gray-200">
+                                        {% if song.title == "Stairway to Heaven" %}
+                                        Stairway to Heaven hace que te sientas motivado, elevando tu dopamina y teniendo citocinas, necesarias para tu equilibrio emocional. Mueve tu cabeza, siente y baila al ritmo del rock, conectando con el sentimiento de la letra y, sobre todo, disfruta del momento en que sintonizas esta canción que te da vida o más vida.
+                                        {% elif song.title == "Bohemian Rhapsody" %}
+                                        Bohemian Rhapsody te lleva a un viaje emocional, fusionando ópera y rock en una explosión creativa. Siente la intensidad de cada nota, déjate llevar por su narrativa y encuentra paz en su armonía caótica.
+                                        {% elif song.title == "Sweet Child O' Mine" %}
+                                        Sweet Child O' Mine despierta nostalgia y pasión con su icónico riff de guitarra. Deja que te envuelva en un abrazo cálido mientras recuerdas momentos felices y te pierdes en su energía rockera.
+                                        {% elif song.title == "Hotel California" %}
+                                        Hotel California te transporta a un mundo de misterio y reflexión con sus acordes hipnóticos. Cierra los ojos, siente la brisa de California y déjate llevar por su historia, que evoca libertad y melancolía.
+                                        {% else %}
+                                        Esta canción te invita a sentir cada nota, conectando con tus emociones más profundas. Disfruta del ritmo, deja que te mueva y vive el momento con intensidad.
+                                        {% endif %}
+                                    </p>
+                                </div>
+                                <!-- Reproductor de Spotify -->
+                                <iframe src="{{ song.embed_url }}" width="100%" height="80" frameBorder="0" allowtransparency="true" allow="encrypted-media" class="mt-4"></iframe>
+                            </div>
+                        </div>
+                        {% endfor %}
+                    {% endif %}
+                </div>
+            </div>
+
+            <!-- Botón Derecho -->
+            <button class="nav-arrow next absolute top-1/2 right-0 transform -translate-y-1/2 bg-black bg-opacity-50 p-3 rounded-full text-2xl z-10 hover:bg-opacity-75 transition-all duration-300">→</button>
+        </div>
+    </div>
+</section>
+
+<section class="hero bg-gray-100 dark:bg-gray-800 py-12">
+    <div class="container mx-auto text-center">
+        <div class="subti mb-6">
+            <button class="boton-subti bg-blue-200 text-black font-bold py-3 px-6 rounded-2xl hover:bg-green-200 transition-all duration-300 font-pacifico">
+                <p>◘ SINTONIZA EL SONIDO DE TÚ VIDA ◘</p>
+            </button>
+        </div>
+        <p class="text-lg mb-6">Descubre y disfruta de tu música favorita con nosotros.</p>
+        <div class="flex justify-center gap-4">
+            <a href="{{ url_for('login') }}" class="btn-session bg-blue-500 text-white py-2 px-4 rounded hover:bg-blue-600 transition">Iniciar Sesión</a>
+            <a href="{{ url_for('register') }}" class="btn-register bg-green-500 text-white py-2 px-4 rounded hover:bg-green-600 transition">Registrarse</a>
+        </div>
+    </div>
+</section>
+{% endblock %}
+
+{% block extra_js %}
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const carousel = document.querySelector('.carousel');
+            const items = document.querySelectorAll('.carousel-item');
+            const prevButton = document.querySelector('.nav-arrow.prev');
+            const nextButton = document.querySelector('.nav-arrow.next');
+            let currentIndex = 0;
+
+            // Objeto para rastrear el estado de reproducción de cada tarjeta
+            const playbackStates = Array(items.length).fill(false); // false = pausado, true = reproduciendo
+
+            // Función para actualizar la visibilidad del carrusel
+            function updateCarousel() {
+                items.forEach(item => item.classList.remove('active'));
+                if (items[currentIndex]) {
+                    items[currentIndex].classList.add('active');
+                }
+                carousel.style.transform = `translateX(-${currentIndex * 100}%)`;
+            }
+
+            // Función para pausar todas las canciones simulando un clic en el botón del iframe
+            function pauseAll() {
+                items.forEach((item, index) => {
+                    const iframe = item.querySelector('iframe');
+                    if (iframe) {
+                        const playPauseButton = iframe.contentDocument?.querySelector('[data-testid="play-pause-button"]');
+                        if (playPauseButton && playbackStates[index]) {
+                            playPauseButton.click();
+                            const playButton = item.querySelector('.play-button');
+                            if (playButton) playButton.textContent = '►';
+                            playbackStates[index] = false;
+                        }
+                    }
+                });
+            }
+
+            // Función para ir al siguiente elemento
+            function goToNext() {
+                pauseAll();
+                currentIndex = (currentIndex + 1) % items.length;
+                updateCarousel();
+            }
+
+            // Función para ir al elemento anterior
+            function goToPrev() {
+                pauseAll();
+                currentIndex = (currentIndex - 1 + items.length) % items.length;
+                updateCarousel();
+            }
+
+            // Añadir event listeners a los botones de navegación
+            nextButton.addEventListener('click', goToNext);
+            prevButton.addEventListener('click', goToPrev);
+
+            // Iniciar el carrusel automáticamente
+            setInterval(goToNext, 35000);
+
+            // Actualizar el carrusel al redimensionar la ventana
+            window.addEventListener('resize', updateCarousel);
+
+            // Mostrar el primer elemento al cargar la página
+            updateCarousel();
+
+            // Manejar los botones de reproducción
+            document.querySelectorAll('.play-button').forEach((button, index) => {
+                button.addEventListener('click', () => {
+                    const iframe = button.closest('.carousel-item').querySelector('iframe');
+                    if (iframe) {
+                        // Esperar a que el iframe esté completamente cargado
+                        iframe.addEventListener('load', () => {
+                            const playPauseButton = iframe.contentDocument?.querySelector('[data-testid="play-pause-button"]');
+                            if (playPauseButton) {
+                                playPauseButton.click();
+                                playbackStates[index] = !playbackStates[index];
+                                button.textContent = playbackStates[index] ? '❚❚' : '►';
+                                console.log(`Clic simulado en el botón de reproducción/pausa en índice ${index}, estado: ${playbackStates[index] ? 'reproduciendo' : 'pausado'}`);
+                            } else {
+                                console.error(`No se encontró el botón de reproducción/pausa en el iframe en índice ${index}`);
+                            }
+                        });
+
+                        // Forzar la ejecución si el iframe ya está cargado
+                        if (iframe.contentDocument?.readyState === 'complete') {
+                            const playPauseButton = iframe.contentDocument?.querySelector('[data-testid="play-pause-button"]');
+                            if (playPauseButton) {
+                                playPauseButton.click();
+                                playbackStates[index] = !playbackStates[index];
+                                button.textContent = playbackStates[index] ? '❚❚' : '►';
+                                console.log(`Clic simulado en el botón de reproducción/pausa en índice ${index}, estado: ${playbackStates[index] ? 'reproduciendo' : 'pausado'}`);
+                            } else {
+                                console.error(`No se encontró el botón de reproducción/pausa en el iframe en índice ${index}`);
+                            }
+                        }
+                    } else {
+                        console.error(`No se encontró iframe para el botón en índice ${index}`);
+                    }
+                });
+            });
+
+            // Animaciones con Anime.js
+            document.querySelector('.title').addEventListener('mouseenter', function() {
+                anime({
+                    targets: this,
+                    scale: [
+                        { value: 1.1, easing: 'easeOutSine', duration: 200 },
+                        { value: 1, easing: 'easeInOutQuad', duration: 500 }
+                    ],
+                    easing: 'easeOutQuad',
+                    duration: 800,
+                    loop: true,
+                    delay: 4500
+                });
+            });
+
+            document.querySelector('.boton-subti').addEventListener('mouseenter', function() {
+                anime({
+                    targets: this,
+                    scale: [
+                        { value: 1.05, easing: 'easeOutSine', duration: 200 },
+                        { value: 1, easing: 'easeInOutQuad', duration: 400 }
+                    ],
+                    easing: 'easeOutQuad',
+                    duration: 600,
+                    loop: true,
+                    delay: 3500
+                });
+            });
+
+            document.querySelector('.btn-session').addEventListener('mouseenter', function() {
+                anime({
+                    targets: this,
+                    scale: [
+                        { value: 1.1, easing: 'easeOutElastic(1, 0.6)', duration: 800 },
+                        { value: 1, easing: 'easeInOutQuad', duration: 300 }
+                    ],
+                    rotate: [
+                        { value: 3, easing: 'easeOutSine', duration: 200 },
+                        { value: -3, easing: 'easeInOutQuad', duration: 200 },
+                        { value: 0, easing: 'easeInOutQuad', duration: 200 }
+                    ],
+                    easing: 'easeOutQuad',
+                    duration: 1200,
+                    loop: true,
+                    delay: 2000
+                });
+            });
+
+            document.querySelector('.btn-register').addEventListener('mouseenter', function() {
+                anime({
+                    targets: this,
+                    scale: [
+                        { value: 1.1, easing: 'easeOutElastic(1, 0.6)', duration: 800 },
+                        { value: 1, easing: 'easeInOutQuad', duration: 300 }
+                    ],
+                    rotate: [
+                        { value: -3, easing: 'easeOutSine', duration: 200 },
+                        { value: 3, easing: 'easeInOutQuad', duration: 200 },
+                        { value: 0, easing: 'easeInOutQuad', duration: 200 }
+                    ],
+                    easing: 'easeOutQuad',
+                    duration: 1200,
+                    loop: true,
+                    delay: 2000
+                });
+            });
+
+            document.querySelector('.title').addEventListener('click', function() {
+                anime({
+                    targets: this,
+                    scale: [
+                        { value: 1.2, easing: 'easeOutQuad', duration: 500 },
+                        { value: 1, easing: 'easeInOutQuad', duration: 800 }
+                    ],
+                    easing: 'easeOutQuad'
+                });
+            });
+
+            document.querySelector('.btn-session').addEventListener('click', function() {
+                anime({
+                    targets: this,
+                    scale: [
+                        { value: 1.1, easing: 'easeOutQuad', duration: 600 },
+                        { value: 1, easing: 'easeInOutQuad', duration: 900 }
+                    ],
+                    easing: 'easeOutQuad'
+                });
+            });
+
+            document.querySelector('.btn-register').addEventListener('click', function() {
+                anime({
+                    targets: this,
+                    scale: [
+                        { value: 1.1, easing: 'easeOutQuad', duration: 600 },
+                        { value: 1, easing: 'easeInOutQuad', duration: 900 }
+                    ],
+                    easing: 'easeOutQuad'
+                });
+            });
+        });
+    </script>
+{% endblock %}

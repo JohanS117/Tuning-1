@@ -1,0 +1,72 @@
+body {
+    font-family: 'Arial', sans-serif;
+    transition: background-color 0.3s, color 0.3s;
+}
+
+.container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 1rem;
+}
+
+a {
+    transition: color 0.3s;
+}
+
+a:hover {
+    color: #60a5fa;
+}
+
+/* Estilos para la barra de progreso */
+.progress-bar-container {
+    display: flex;
+    align-items: center;
+    width: 100%;
+}
+
+#progress-bar {
+    -webkit-appearance: none;
+    appearance: none;
+    width: 100%;
+    height: 8px;
+    background: #4a5568;
+    border-radius: 4px;
+    outline: none;
+    transition: background 0.2s;
+}
+
+#progress-bar::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    appearance: none;
+    width: 16px;
+    height: 16px;
+    background: #48bb78;
+    border-radius: 50%;
+    cursor: pointer;
+}
+
+#progress-bar::-moz-range-thumb {
+    width: 16px;
+    height: 16px;
+    background: #48bb78;
+    border-radius: 50%;
+    cursor: pointer;
+}
+
+#current-time, #duration {
+    font-size: 0.875rem;
+    color: #a0aec0;
+}
+
+/* Estilos para las canciones colapsables */
+.songs-list .extra-songs {
+    display: none;
+}
+
+.songs-list .extra-songs:not(.hidden) {
+    display: block;
+}
+
+.toggle-songs {
+    cursor: pointer;
+}

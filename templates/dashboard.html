@@ -1,0 +1,211 @@
+{% extends 'base.html' %}
+{% block title %}Tuning - Dashboard{% endblock %}
+{% block content %}
+
+<section class="dashboard-container max-w-4xl mx-auto p-6">
+    <h1 class="text-3xl font-bold mb-6">😎Hola, {{ session.user_name }}!</h1>
+
+    <!-- Botón para conectar con Spotify -->
+    {% if not 'spotify_token' in session %}
+    <div class="mb-8">
+        <h2 class="text-2xl font-semibold mb-4">Conectar con Spotify</h2>
+        <p class="text-gray-600 dark:text-gray-300 mb-4">Conecta tu cuenta de Spotify para obtener recomendaciones personalizadas.</p>
+        <a href="/login-spotify" class="bg-green-500 text-white py-2 px-4 rounded hover:bg-green-600 transition">Conectar con Spotify</a>
+    </div>
+    {% endif %}
+
+    <!-- Playlists -->
+    <div class="mb-8">
+        <h2 class="text-2xl font-semibold mb-4">Tus Playlists</h2>
+        <!-- Formulario para crear una nueva playlist -->
+        <form class="create-playlist-form flex items-center gap-4" method="POST" action="/create_playlist">
+            <div class="flex items-center gap-4">
+                <div class="flex-1">
+                    <label for="playlist-name" class="block text-sm font-medium mb-2">Nombre de la Playlist</label>
+                    <input type="text" id="playlist-name" name="playlist_name" placeholder="Nombre de la playlist" class="p-2 border rounded dark:bg-gray-700 dark:border-gray-600 dark:text-white">
+                </div>
+                <button type="submit" id="submit-playlist" class="bg-blue-500 text-white py-2 px-4 rounded hover:bg-blue-600 transition">Crear Playlist</button>
+            </div>
+        </form>
+
+        {% if playlists %}
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+            {% for playlist in playlists %}
+            <div class="bg-white dark:bg-gray-800 p-4 rounded-lg shadow">
+                <div class="flex justify-between items-center">
+                    <h3 class="text-lg font-medium playlist-title">{{ playlist.name }}</h3>
+                    <button class="play-playlist bg-green-500 text-white py-1 px-2 rounded hover:bg-green-600 transition" data-playlist-id="{{ playlist.id }}">Reproducir Todo</button>
+                </div>
+                <p class="text-gray-600 dark:text-gray-300">Creada el: {{ playlist.created_at.strftime('%Y-%m-%d') }}</p>
+                <!-- Mostrar canciones de la playlist -->
+                {% if playlist.songs %}
+                    <div class="mt-4">
+                        <h4 class="text-md font-semibold mb-2">Canciones:</h4>
+                        <div class="songs-list space-y-2" data-playlist-id="{{ playlist.id }}">
+                            {% for song in playlist.songs[:3] %}
+                            <div class="bg-gray-100 dark:bg-gray-700 p-2 rounded flex items-center justify-between">
+                                <div>
+                                    <p class="text-gray-800 dark:text-gray-200">{{ song.title }} - {{ song.artist }}</p>
+                                </div>
+                                <button class="play-button bg-green-500 text-white py-1 px-2 rounded hover:bg-green-600 transition" data-uri="{{ song.uri }}" data-title="{{ song.title }}" data-artist="{{ song.artist }}" data-playlist-id="{{ playlist.id }}">Reproducir</button>
+                            </div>
+                            {% endfor %}
+                            {% if playlist.songs|length > 3 %}
+                            <div class="hidden extra-songs space-y-2">
+                                {% for song in playlist.songs[3:] %}
+                                <div class="bg-gray-100 dark:bg-gray-700 p-2 rounded flex items-center justify-between">
+                                    <div>
+                                        <p class="text-gray-800 dark:text-gray-200">{{ song.title }} - {{ song.artist }}</p>
+                                    </div>
+                                    <button class="play-button bg-green-500 text-white py-1 px-2 rounded hover:bg-green-600 transition" data-uri="{{ song.uri }}" data-title="{{ song.title }}" data-artist="{{ song.artist }}" data-playlist-id="{{ playlist.id }}">Reproducir</button>
+                                </div>
+                                {% endfor %}
+                            </div>
+                            <button class="toggle-songs text-blue-500 hover:underline mt-2">Ver Más</button>
+                            {% endif %}
+                        </div>
+                    </div>
+                {% else %}
+                <p class="text-gray-600 dark:text-gray-300 mt-2">No hay canciones en esta playlist.</p>
+                {% endif %}
+            </div>
+            {% endfor %}
+        </div>
+        {% else %}
+        <p class="text-gray-600 dark:text-gray-300">No tienes playlists aún. ¡Crea una!</p>
+        {% endif %}
+    </div>
+
+    <!-- Sección de canciones recomendadas -->
+    <h2 class="text-2xl font-semibold mb-4">Canciones Recomendadas</h2>
+    <div class="relative overflow-hidden">
+        <button id="recommended-left-btn" class="absolute top-1/2 left-0 transform -translate-y-1/2 bg-black bg-opacity-50 p-2 text-2xl z-10">←</button>
+        <div id="recommended-slider" class="flex transition-transform duration-500 ease-in-out">
+            {% for song in recommended_songs %}
+            <div class="min-w-[200px] mx-2 rounded">
+                <div class="relative">
+                    <img src="{{ song.image_url }}" alt="{{ song.title }}" class="w-full h-48 object-cover rounded-md mb-4">
+                    <button class="play-button absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 text-white text-4xl opacity-50 hover:opacity-100 transition-opacity" data-uri="{{ song.uri }}" data-title="{{ song.title }}" data-artist="{{ song.artist }}">►</button>
+                </div>
+                <h3 class="text-lg font-semibold truncate">{{ song.title }}</h3>
+                <p class="text-gray-600 dark:text-gray-300 truncate">{{ song.artist }}</p>
+                <form class="add-to-playlist-form mt-2 flex items-center gap-2" data-uri="{{ song.uri }}" data-title="{{ song.title }}" data-artist="{{ song.artist }}">
+                    <input type="hidden" name="song_uri" value="{{ song.uri }}">
+                    <input type="hidden" name="song_title" value="{{ song.title }}">
+                    <input type="hidden" name="song_artist" value="{{ song.artist }}">
+                    <select name="playlist_id" class="p-1 text-sm border rounded dark:bg-gray-700 dark:border-gray-600 dark:text-white">
+                        <option value="">Seleccionar Playlist</option>
+                        {% for playlist in playlists %}
+                        <option value="{{ playlist.id }}">{{ playlist.name }}</option>
+                        {% endfor %}
+                    </select>
+                    <button type="submit" class="bg-blue-500 text-white py-1 px-2 text-sm rounded hover:bg-blue-600 transition">Agregar</button>
+                </form>
+            </div>
+            {% endfor %}
+        </div>
+        <button id="recommended-right-btn" class="absolute top-1/2 right-0 transform -translate-y-1/2 bg-black bg-opacity-50 p-2 text-2xl z-10">→</button>
+    </div>
+
+    <!-- Sección de canciones de la playlist del administrador -->
+    {% if admin_playlist_songs %}
+    <h2 class="text-2xl font-semibold mb-4 mt-8">Explora la Playlist del Administrador</h2>
+    <div class="relative overflow-hidden">
+        <button id="admin-left-btn" class="absolute top-1/2 left-0 transform -translate-y-1/2 bg-black bg-opacity-50 p-2 text-2xl z-10">←</button>
+        <div id="admin-slider" class="flex transition-transform duration-500 ease-in-out">
+            {% for song in admin_playlist_songs %}
+            <div class="min-w-[200px] mx-2 rounded">
+                <div class="relative">
+                    <img src="{{ song.image_url }}" alt="{{ song.title }}" class="w-full h-48 object-cover rounded-md mb-4">
+                    <button class="play-button absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 text-white text-4xl opacity-50 hover:opacity-100 transition-opacity" data-uri="{{ song.uri }}" data-title="{{ song.title }}" data-artist="{{ song.artist }}">►</button>
+                </div>
+                <h3 class="text-lg font-semibold truncate">{{ song.title }}</h3>
+                <p class="text-gray-600 dark:text-gray-300 truncate">{{ song.artist }}</p>
+                <form class="add-to-playlist-form mt-2 flex items-center gap-2" data-uri="{{ song.uri }}" data-title="{{ song.title }}" data-artist="{{ song.artist }}">
+                    <input type="hidden" name="song_uri" value="{{ song.uri }}">
+                    <input type="hidden" name="song_title" value="{{ song.title }}">
+                    <input type="hidden" name="song_artist" value="{{ song.artist }}">
+                    <select name="playlist_id" class="p-1 text-sm border rounded dark:bg-gray-700 dark:border-gray-600 dark:text-white">
+                        <option value="">Seleccionar Playlist</option>
+                        {% for playlist in playlists %}
+                        <option value="{{ playlist.id }}">{{ playlist.name }}</option>
+                        {% endfor %}
+                    </select>
+                    <button type="submit" class="bg-blue-500 text-white py-1 px-2 text-sm rounded hover:bg-blue-600 transition">Agregar</button>
+                </form>
+            </div>
+            {% endfor %}
+        </div>
+        <button id="admin-right-btn" class="absolute top-1/2 right-0 transform -translate-y-1/2 bg-black bg-opacity-50 p-2 text-2xl z-10">→</button>
+    </div>
+    {% endif %}
+
+    <!-- Historial de Escucha -->
+    <div class="mb-8">
+        <h2 class="text-2xl font-semibold mb-4">Historial de Escucha</h2>
+        <div id="listening-history" class="space-y-4">
+            {% if listening_history %}
+            {% for entry in listening_history %}
+            <div class="bg-white dark:bg-gray-800 p-4 rounded-lg shadow flex items-center justify-between">
+                <div>
+                    <p class="text-lg font-medium">{{ entry.song_title }} - {{ entry.song_artist }}</p>
+                    <p class="text-gray-600 dark:text-gray-300">Escuchada el: {{ entry.listened_at.strftime('%Y-%m-%d %H:%M:%S') }}</p>
+                </div>
+                <button class="play-button bg-green-500 text-white py-1 px-2 rounded hover:bg-green-600 transition" data-uri="{{ entry.song_uri }}" data-title="{{ entry.song_title }}" data-artist="{{ entry.song_artist }}">Reproducir</button>
+            </div>
+            {% endfor %}
+            {% else %}
+            <p class="text-gray-600 dark:text-gray-300">Aún no has escuchado canciones.</p>
+            {% endif %}
+        </div>
+        {% if listening_history %}
+        <button id="load-more-history" class="mt-4 bg-blue-500 text-white py-2 px-4 rounded hover:bg-blue-600 transition">Ver Más</button>
+        {% endif %}
+    </div>
+
+    <!-- Formulario para dejar comentarios -->
+    <div class="mb-8">
+        <h2 class="text-2xl font-semibold mb-4">Deja tu Feedback</h2>
+        {% if comment_success %}
+        <div class="bg-green-100 text-green-700 px-4 py-3 rounded mb-4 border border-green-400" role="alert">
+            ♥ ¡Gracias por tu comentario! ♥
+        </div>
+        {% endif %}
+        {% if comment_error %}
+        <div class="bg-red-100 text-red-700 px-4 py-3 rounded mb-4 border border-red-400" role="alert">
+            {{ comment_error }}
+        </div>
+        {% endif %}
+        <form method="POST" action="/submit_comment">
+            <div class="mb-4">
+                <label for="comment" class="block text-sm font-medium mb-2">Comentario</label>
+                <textarea id="comment" name="comment" rows="3" class="w-full p-2 border rounded dark:bg-gray-700 dark:border-gray-600 dark:text-white" placeholder="Escribe tu comentario sobre la aplicación..." required></textarea>
+            </div>
+            <button type="submit" class="bg-blue-500 text-white py-2 px-4 rounded hover:bg-blue-600 transition">Enviar Comentario</button>
+        </form>
+    </div>
+
+    <!-- Reproductor de Playlist -->
+    <div id="player" class="fixed bottom-0 left-0 w-full bg-gray-800 text-white p-4 flex items-center justify-between">
+        <div class="flex items-center">
+            <img id="player-album" src="https://picsum.photos/50/50?random=1" alt="Album" class="w-12 h-12 object-cover rounded-md mr-4">
+            <div>
+                <p id="player-title" class="text-lg font-semibold">Título</p>
+                <p id="player-artist" class="text-gray-300">Artista</p>
+            </div>
+        </div>
+        <div class="flex-1 mx-4">
+            <div class="progress-bar-container flex items-center">
+                <span id="current-time" class="text-sm mr-2">00:00</span>
+                <input type="range" id="progress-bar" class="w-full" min="0" max="100" value="0">
+                <span id="duration" class="text-sm ml-2">00:00</span>
+            </div>
+        </div>
+        <div class="flex items-center gap-4">
+            <button id="prev-track" class="bg-blue-500 text-white py-2 px-4 rounded hover:bg-blue-600 transition">Anterior</button>
+            <button id="play-pause" class="bg-green-500 text-white py-2 px-4 rounded hover:bg-green-600 transition">Pausar</button>
+            <button id="next-track" class="bg-blue-500 text-white py-2 px-4 rounded hover:bg-blue-600 transition">Siguiente</button>
+        </div>
+    </div>
+</section>
+{% endblock %}

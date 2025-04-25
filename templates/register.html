@@ -1,0 +1,36 @@
+{% extends 'base.html' %}
+{% block title %}Tuning - Registrarse{% endblock %}
+{% block content %}
+<section class="register-container max-w-md mx-auto bg-white dark:bg-gray-800 p-6 rounded-lg shadow-lg mt-8">
+    <h1 class="text-3xl font-bold text-center mb-6">♪ Registrarse ♫</h1>
+
+    <!-- Mostrar mensaje de error si existe -->
+    {% if error %}
+    <div class="bg-red-100 text-red-700 px-4 py-3 rounded mb-4 border border-red-400" role="alert">
+        {{ error }}
+    </div>
+    {% endif %}
+
+    <form method="POST" action="/register">
+        <div class="mb-4">
+            <label for="email" class="block text-sm font-medium mb-2">Correo Electrónico</label>
+            <input type="email" id="email" name="email" class="w-full p-2 border rounded dark:bg-gray-700 dark:border-gray-600 dark:text-white" required>
+        </div>
+        <div class="mb-4">
+            <label for="name" class="block text-sm font-medium mb-2">Nombre</label>
+            <input type="text" id="name" name="name" class="w-full p-2 border rounded dark:bg-gray-700 dark:border-gray-600 dark:text-white"  placeholder="░ Ingresar nombre y apellido •" required>
+        </div>
+        <div class="mb-4">
+            <label for="music_genre" class="block text-sm font-medium mb-2">Género Musical Favorito</label>
+            <input type="text" id="music_genre" name="music_genre" class="w-full p-2 border rounded dark:bg-gray-700 dark:border-gray-600 dark:text-white" placeholder="♪ Ejemplo: Rock, Pop, Jazz...">
+        </div>
+        <div class="mb-6">
+            <label for="password" class="block text-sm font-medium mb-2">Contraseña</label>
+            <input type="password" id="password" name="password" class="w-full p-2 border rounded dark:bg-gray-700 dark:border-gray-600 dark:text-white" required>
+        </div>
+        <button type="submit" class="w-full bg-green-500 text-white py-2 rounded hover:bg-green-600 transition">Registrarse</button>
+    </form>
+
+    <p class="text-center mt-4">¿Ya tienes una cuenta? <a href="/login" class="text-blue-500 hover:underline">Inicia Sesión</a></p>
+</section>
+{% endblock %}
