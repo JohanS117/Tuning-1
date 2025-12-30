@@ -1,0 +1,69 @@
+{% extends 'base.html' %}
+{% block title %}Tuning - Artistas{% endblock %}
+{% block content %}
+<div class="p-6">
+    <h1 class="text-3xl font-bold mb-6">Publicaciones de Artistas</h1>
+
+    {% if songs %}
+    <div class="space-y-6">
+        {% for song in songs %}
+        <div class="bg-white dark:bg-gray-800 p-4 rounded-lg shadow">
+            <h2 class="text-xl font-semibold">{{ song.title }}</h2>
+            <p class="text-gray-700 dark:text-gray-300">Subida el: {{ song.created_at.strftime('%Y-%m-%d %H:%M:%S') }}</p>
+            <audio controls class="mt-2 w-full">
+                <source src="{{ song.file_url }}" type="audio/mpeg">
+                Tu navegador no soporta el elemento de audio.
+            </audio>
+            <!-- Acciones para usuarios estándar (rol 2) -->
+            {% if user_role == 2 %}
+            <div class="mt-4 flex gap-4">
+                <button class="bg-blue-500 text-white py-1 px-3 rounded hover:bg-blue-600 transition comment-btn" data-song-id="{{ song.id }}">Comentar</button>
+                <button class="bg-green-500 text-white py-1 px-3 rounded hover:bg-green-600 transition react-btn" data-song-id="{{ song.id }}">Reaccionar</button>
+                <button class="bg-purple-500 text-white py-1 px-3 rounded hover:bg-purple-600 transition repost-btn" data-song-id="{{ song.id }}">Compartir</button>
+            </div>
+            <!-- Formulario de comentario (oculto por defecto) -->
+            <form class="comment-form mt-4 hidden" data-song-id="{{ song.id }}" method="POST" action="/submit_comment">
+                <textarea name="comment" class="w-full p-2 border rounded dark:bg-gray-700 dark:border-gray-600 dark:text-white" rows="3" placeholder="Escribe tu comentario..."></textarea>
+                <button type="submit" class="bg-blue-500 text-white py-1 px-3 rounded hover:bg-blue-600 transition mt-2">Enviar</button>
+            </form>
+            {% endif %}
+        </div>
+        {% endfor %}
+    </div>
+    {% else %}
+    <p class="text-gray-600 dark:text-gray-300">No hay publicaciones de artistas aún.</p>
+    {% endif %}
+
+    <!-- Botón para volver al dashboard -->
+    <a href="{{ url_for('dashboard') }}" class="mt-6 inline-block bg-gray-500 text-white py-2 px-4 rounded hover:bg-gray-600 transition">Volver al Dashboard</a>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+    // Mostrar/ocultar formulario de comentario
+    document.querySelectorAll('.comment-btn').forEach(button => {
+        button.addEventListener('click', () => {
+            const songId = button.getAttribute('data-song-id');
+            const form = document.querySelector(`.comment-form[data-song-id="${songId}"]`);
+            form.classList.toggle('hidden');
+        });
+    });
+
+    // Lógica para reaccionar (simulada)
+    document.querySelectorAll('.react-btn').forEach(button => {
+        button.addEventListener('click', () => {
+            alert('¡Has reaccionado a esta publicación!');
+            // Aquí puedes implementar una llamada al backend para guardar la reacción
+        });
+    });
+
+    // Lógica para repostear (simulada)
+    document.querySelectorAll('.repost-btn').forEach(button => {
+        button.addEventListener('click', () => {
+            alert('¡Publicación reposteada!');
+            // Aquí puedes implementar una llamada al backend para repostear
+        });
+    });
+});
+</script>
+{% endblock %}

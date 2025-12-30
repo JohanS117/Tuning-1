@@ -1,0 +1,172 @@
+{% extends 'base.html' %}
+{% block title %}Tuning - Listar Usuarios{% endblock %}
+{% block content %}
+<div id="section-content">
+    <h1 class="text-3xl font-bold mb-6">Listar Usuarios</h1>
+    <div class="p-6 rounded-lg shadow song-card relative">
+        <h2 class="text-2xl font-semibold mb-4">Usuarios</h2>
+        {% if users %}
+        <div class="table-container relative overflow-x-auto">
+            <table class="w-full text-sm text-left text-gray-500 dark:text-gray-400">
+                <thead class="text-xs text-gray-700 uppercase bg-gray-50 dark:bg-gray-700 dark:text-gray-400">
+                    <tr>
+                        <th scope="col" class="px-6 py-3">ID</th>
+                        <th scope="col" class="px-6 py-3">Correo</th>
+                        <th scope="col" class="px-6 py-3">Nombre</th>
+                        <th scope="col" class="px-6 py-3">Música</th>
+                        <th scope="col" class="px-6 py-3">Rol</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for user in users %}
+                    <tr class="bg-white border-b dark:bg-gray-800 dark:border-gray-700">
+                        <th scope="row" class="px-6 py-4 font-medium text-gray-900 whitespace-nowrap dark:text-white">{{ user.id }}</th>
+                        <td class="px-6 py-4">{{ user.email }}</td>
+                        <td class="px-6 py-4">{{ user.name }}</td>
+                        <td class="px-6 py-4">{{ user.music_preference or 'No especificado' }}</td>
+                        <td class="px-6 py-4">
+                            <div class="roles" role="alert">
+                                {% if user.role_id == 1 %}
+                                    <span class="badge rounded-pill bg-danger">Admin</span>
+                                {% elif user.role_id == 2 %}
+                                    <span class="badge rounded-pill bg-primary">Usuario</span>
+                                {% else %}
+                                    <span class="badge rounded-pill bg-secondary">Desconocido</span>
+                                {% endif %}
+                            </div>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+            <!-- Esfera animada -->
+            <div class="animacion"></div>
+        </div>
+        {% else %}
+        <p class="text-gray-600 dark:text-gray-300">No hay usuarios registrados.</p>
+        {% endif %}
+    </div>
+</div>
+
+<style>
+    /* Estilos para la tabla */
+    .table-container {
+        position: relative;
+        margin: 0;
+        padding: 0;
+    }
+
+    table {
+        border-collapse: collapse;
+        width: 100%;
+        min-width: 600px; /* Asegura que la tabla tenga un ancho mínimo */
+    }
+
+    /* Estilos para la esfera animada */
+    .animacion {
+        width: 27px;
+        height: 27px;
+        background: linear-gradient(45deg, #ff4d4d, #ffd700, #4ade80, #3b82f6, #ff4d4d);
+        background-size: 400% 400%;
+        position: absolute;
+        border-radius: 50%;
+        box-shadow: 0 0 15px rgba(255, 215, 0, 0.8), 0 0 30px rgba(255, 0, 0, 0.5);
+        animation: recorrido 8s linear infinite, gradientShift 4s ease infinite;
+        z-index: 10;
+    }
+
+    @keyframes recorrido {
+        0% {
+            top: -30px;
+            left: -30px;
+        }
+        25% {
+            top: -30px;
+            left: calc(100% + 30px);
+        }
+        50% {
+            top: calc(100% + 30px);
+            left: calc(100% + 30px);
+        }
+        75% {
+            top: calc(100% + 30px);
+            left: -30px;
+        }
+        100% {
+            top: -30px;
+            left: -30px;
+        }
+    }
+
+    @keyframes gradientShift {
+        0% { background-position: 0% 50%; }
+        50% { background-position: 100% 50%; }
+        100% { background-position: 0% 50%; }
+    }
+
+    /* Ajustes para el tema claro/oscuro */
+    .dark-theme .table-container table {
+        background-color: #2d3748;
+    }
+    .light-theme .table-container table {
+        background-color: #ffffff;
+    }
+</style>
+
+<script>
+    // Ajustar dinámicamente los puntos de la animación según el tamaño de la tabla
+    function adjustAnimationPath() {
+        const table = document.querySelector('.table-container table');
+        const sphere = document.querySelector('.animacion');
+
+        if (!table || !sphere) return;
+
+        // Obtener dimensiones de la tabla
+        const tableRect = table.getBoundingClientRect();
+        const containerRect = document.querySelector('.table-container').getBoundingClientRect();
+        const width = tableRect.width;
+        const height = tableRect.height;
+
+        // Ajustar el keyframe dinámicamente
+        const styleSheet = document.createElement('style');
+        document.head.appendChild(styleSheet);
+        styleSheet.sheet.insertRule(`
+            @keyframes recorrido {
+                0% {
+                    top: -30px;
+                    left: -30px;
+                }
+                25% {
+                    top: -30px;
+                    left: ${width + 30}px;
+                }
+                50% {
+                    top: ${height + 30}px;
+                    left: ${width + 30}px;
+                }
+                75% {
+                    top: ${height + 30}px;
+                    left: -30px;
+                }
+                100% {
+                    top: -30px;
+                    left: -30px;
+                }
+            }
+        `, 0);
+    }
+
+    // Ejecutar al cargar la página y al redimensionar la ventana
+    window.addEventListener('load', adjustAnimationPath);
+    window.addEventListener('resize', adjustAnimationPath);
+
+    // Observar cambios en el DOM (por ejemplo, si se agregan más usuarios dinámicamente)
+    const tableContainer = document.querySelector('.table-container');
+    if (tableContainer) {
+        const observer = new MutationObserver(() => {
+            adjustAnimationPath();
+        });
+        observer.observe(tableContainer, { childList: true, subtree: true });
+    }
+</script>
+{% endblock %}

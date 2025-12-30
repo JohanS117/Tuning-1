@@ -1,0 +1,82 @@
+{
+    "rock": [
+    {"title": "Sweet Child O' Mine", "artist": "Guns N' Roses", "image_url": "https://i.scdn.co/image/ab67616d0000b273e5a25ed08d1e7e0f0b1e5a0", "uri": "spotify:track:7o2CTH4ctstm8TNelqjb51", "embed_url": "https://open.spotify.com/embed/track/7o2CTH4ctstm8TNelqjb51"},
+    {"title": "Bohemian Rhapsody", "artist": "Queen", "image_url": "https://i.scdn.co/image/ab67616d0000b273e8b066f70c20660e4e3c052", "uri": "spotify:track:1AhDOtG9vPSOmsWgNW0BEY", "embed_url": "https://open.spotify.com/embed/track/1AhDOtG9vPSOmsWgNW0BEY"},
+    {"title": "Smells Like Teen Spirit", "artist": "Nirvana", "image_url": "https://i.scdn.co/image/ab67616d0000b273a7b7a67415f5d3d2d6767b5", "uri": "spotify:track:5ghIJDpPoe3CfHMGu71E6T", "embed_url": "https://open.spotify.com/embed/track/5ghIJDpPoe3CfHMGu71E6T"},
+    {"title": "Hotel California", "artist": "Eagles", "image_url": "https://i.scdn.co/image/ab67616d0000b273d8e3e1b5a7f2a4d9b7b9a2f", "uri": "spotify:track:40riOy7x9W7GXjyGp4pjAv", "embed_url": "https://open.spotify.com/embed/track/40riOy7x9W7GXjyGp4pjAv"},
+    {"title": "Back in Black", "artist": "AC/DC", "image_url": "https://i.scdn.co/image/ab67616d0000b2737412e022b1e6472e2b8e162", "uri": "spotify:track:08mG3Y1vljYA6bvDt4Wqkj", "embed_url": "https://open.spotify.com/embed/track/08mG3Y1vljYA6bvDt4Wqkj"},
+    {"title": "Livin' on a Prayer", "artist": "Bon Jovi", "image_url": "https://i.scdn.co/image/ab67616d0000b273e5154e7e1e1e6e1e1e1e1e1", "uri": "spotify:track:37ZJ0p5Jm13JPevGcx4SkF", "embed_url": "https://open.spotify.com/embed/track/37ZJ0p5Jm13JPevGcx4SkF"},
+    {"title": "Paint It Black", "artist": "The Rolling Stones", "image_url": "https://i.scdn.co/image/ab67616d0000b273d2e3e1b5a7f2a4d9b7b9a2f", "uri": "spotify:track:6vGqG7vG7vG7vG7vG7vG7v", "embed_url": "https://open.spotify.com/embed/track/6vGqG7vG7vG7vG7vG7vG7v"},
+    {"title": "Enter Sandman", "artist": "Metallica", "image_url": "https://i.scdn.co/image/ab67616d0000b273e5a25ed08d1e7e0f0b1e5a0", "uri": "spotify:track:5BIMPccDwShpXqH8UFrZvW", "embed_url": "https://open.spotify.com/embed/track/5BIMPccDwShpXqH8UFrZvW"}
+],
+    "pop": [
+        {"title": "Shape of You", "artist": "Ed Sheeran", "uri": "spotify:track:7qiZfU4dY1lWllzX7mPBI3", "embed_url": "https://open.spotify.com/embed/track/7qiZfU4dY1lWllzX7mPBI3", "image_url": "https://picsum.photos/300/200?random=9"},
+        {"title": "Uptown Funk", "artist": "Mark Ronson ft. Bruno Mars", "uri": "spotify:track:32OlwWuMpZ6b0aN2RZOeMS", "embed_url": "https://open.spotify.com/embed/track/32OlwWuMpZ6b0aN2RZOeMS", "image_url": "https://picsum.photos/300/200?random=10"},
+        {"title": "Blinding Lights", "artist": "The Weeknd", "uri": "spotify:track:0VjIjW4M7eIRk8dH8N5fW", "embed_url": "https://open.spotify.com/embed/track/0VjIjW4M7eIRk8dH8N5fW", "image_url": "https://picsum.photos/300/200?random=11"},
+        {"title": "Billie Jean", "artist": "Michael Jackson", "uri": "spotify:track:5ChkMS8OtdzJeqyybCc9R5", "embed_url": "https://open.spotify.com/embed/track/5ChkMS8OtdzJeqyybCc9R5", "image_url": "https://picsum.photos/300/200?random=12"},
+        {"title": "Dancing Queen", "artist": "ABBA", "uri": "spotify:track:0GjEhVFGZW8AfA5nD2kFD", "embed_url": "https://open.spotify.com/embed/track/0GjEhVFGZW8AfA5nD2kFD", "image_url": "https://picsum.photos/300/200?random=13"},
+        {"title": "Shake It Off", "artist": "Taylor Swift", "uri": "spotify:track:0cqRj7pUJDkTWA4n7lAOl", "embed_url": "https://open.spotify.com/embed/track/0cqRj7pUJDkTWA4n7lAOl", "image_url": "https://picsum.photos/300/200?random=14"},
+        {"title": "I Gotta Feeling", "artist": "The Black Eyed Peas", "uri": "spotify:track:4DkbvL72swhvH3dMMcwnHP", "embed_url": "https://open.spotify.com/embed/track/4DkbvL72swhvH3dMMcwnHP", "image_url": "https://picsum.photos/300/200?random=15"},
+        {"title": "Roar", "artist": "Katy Perry", "uri": "spotify:track:27tNWlhdAryQY04x3ZHBJF", "embed_url": "https://open.spotify.com/embed/track/27tNWlhdAryQY04x3ZHBJF", "image_url": "https://picsum.photos/300/200?random=16"}
+    ],
+    "alt-rock": [
+        {"title": "Creep", "artist": "Radiohead", "uri": "spotify:track:6b2oQwSGFkzsMt7Hl1wYip", "embed_url": "https://open.spotify.com/embed/track/6b2oQwSGFkzsMt7Hl1wYip", "image_url": "https://picsum.photos/300/200?random=17"},
+        {"title": "Mr. Brightside", "artist": "The Killers", "uri": "spotify:track:003vvx7Niy0yvhvDt4aOcS", "embed_url": "https://open.spotify.com/embed/track/003vvx7Niy0yvhvDt4aOcS", "image_url": "https://picsum.photos/300/200?random=18"},
+        {"title": "Everlong", "artist": "Foo Fighters", "uri": "spotify:track:5VJHYnrd1x2W4v2S3FZmzN", "embed_url": "https://open.spotify.com/embed/track/5VJHYnrd1x2W4v2S3FZmzN", "image_url": "https://picsum.photos/300/200?random=19"},
+        {"title": "Basket Case", "artist": "Green Day", "uri": "spotify:track:6L89mwZXU6bNFfMvfjG0rL", "embed_url": "https://open.spotify.com/embed/track/6L89mwZXU6bNFfMvfjG0rL", "image_url": "https://picsum.photos/300/200?random=20"},
+        {"title": "Wonderwall", "artist": "Oasis", "uri": "spotify:track:4pbJqGIASGPr0ZpGpnWkCp", "embed_url": "https://open.spotify.com/embed/track/4pbJqGIASGPr0ZpGpnWkCp", "image_url": "https://picsum.photos/300/200?random=21"},
+        {"title": "1979", "artist": "The Smashing Pumpkins", "uri": "spotify:track:5eXgG8J0Gq9AUsjQ0bLBWq", "embed_url": "https://open.spotify.com/embed/track/5eXgG8J0Gq9AUsjQ0bLBWq", "image_url": "https://picsum.photos/300/200?random=22"},
+        {"title": "I Will Follow You Into the Dark", "artist": "Death Cab for Cutie", "uri": "spotify:track:2kZx25Md5Fpvz3fPfOC8cB", "embed_url": "https://open.spotify.com/embed/track/2kZx25Md5Fpvz3fPfOC8cB", "image_url": "https://picsum.photos/300/200?random=23"},
+        {"title": "How to Save a Life", "artist": "The Fray", "uri": "spotify:track:5F2bG7S1UdL0TShq1L2xPn", "embed_url": "https://open.spotify.com/embed/track/5F2bG7S1UdL0TShq1L2xPn", "image_url": "https://picsum.photos/300/200?random=24"}
+    ],
+    "punk-rock": [
+        {"title": "American Idiot", "artist": "Green Day", "uri": "spotify:track:6nTiIhLmQ3e5J4pHBbjJpn", "embed_url": "https://open.spotify.com/embed/track/6nTiIhLmQ3e5J4pHBbjJpn", "image_url": "https://picsum.photos/300/200?random=25"},
+        {"title": "I Fought the Law", "artist": "The Clash", "uri": "spotify:track:4G3G5hMgWExYvL0k3q0Gvf", "embed_url": "https://open.spotify.com/embed/track/4G3G5hMgWExYvL0k3q0Gvf", "image_url": "https://picsum.photos/300/200?random=26"},
+        {"title": "Blitzkrieg Bop", "artist": "Ramones", "uri": "spotify:track:5F2bG7S1UdL0TShq1L2xPn", "embed_url": "https://open.spotify.com/embed/track/5F2bG7S1UdL0TShq1L2xPn", "image_url": "https://picsum.photos/300/200?random=27"},
+        {"title": "Holiday", "artist": "Green Day", "uri": "spotify:track:0k2f6eOwYkVD7p7nNusvR7", "embed_url": "https://open.spotify.com/embed/track/0k2f6eOwYkVD7p7nNusvR7", "image_url": "https://picsum.photos/300/200?random=28"},
+        {"title": "Anarchy in the U.K.", "artist": "Sex Pistols", "uri": "spotify:track:2j3W34XqWkuS0r1bR5v9G", "embed_url": "https://open.spotify.com/embed/track/2j3W34XqWkuS0r1bR5v9G", "image_url": "https://picsum.photos/300/200?random=29"},
+        {"title": "London Calling", "artist": "The Clash", "uri": "spotify:track:5b7OgHYeJ7uS0Y0dXnE5zG", "embed_url": "https://open.spotify.com/embed/track/5b7OgHYeJ7uS0Y0dXnE5zG", "image_url": "https://picsum.photos/300/200?random=30"},
+        {"title": "Sheena Is a Punk Rocker", "artist": "Ramones", "uri": "spotify:track:5F2bG7S1UdL0TShq1L2xPn", "embed_url": "https://open.spotify.com/embed/track/5F2bG7S1UdL0TShq1L2xPn", "image_url": "https://picsum.photos/300/200?random=31"},
+        {"title": "Good Riddance (Time of Your Life)", "artist": "Green Day", "uri": "spotify:track:0k2f6eOwYkVD7p7nNusvR7", "embed_url": "https://open.spotify.com/embed/track/0k2f6eOwYkVD7p7nNusvR7", "image_url": "https://picsum.photos/300/200?random=32"}
+    ],
+    "grunge": [
+        {"title": "Where Did You Sleep Last Night", "artist": "Nirvana", "uri": "spotify:track:5F2bG7S1UdL0TShq1L2xPn", "embed_url": "https://open.spotify.com/embed/track/5F2bG7S1UdL0TShq1L2xPn", "image_url": "https://picsum.photos/300/200?random=33"},
+        {"title": "Alive", "artist": "Pearl Jam", "uri": "spotify:track:0k2f6eOwYkVD7p7nNusvR7", "embed_url": "https://open.spotify.com/embed/track/0k2f6eOwYkVD7p7nNusvR7", "image_url": "https://picsum.photos/300/200?random=34"},
+        {"title": "Black Hole Sun", "artist": "Soundgarden", "uri": "spotify:track:2j3W34XqWkuS0r1bR5v9G", "embed_url": "https://open.spotify.com/embed/track/2j3W34XqWkuS0r1bR5v9G", "image_url": "https://picsum.photos/300/200?random=35"},
+        {"title": "Come As You Are", "artist": "Nirvana", "uri": "spotify:track:5b7OgHYeJ7uS0Y0dXnE5zG", "embed_url": "https://open.spotify.com/embed/track/5b7OgHYeJ7uS0Y0dXnE5zG", "image_url": "https://picsum.photos/300/200?random=36"},
+        {"title": "Jeremy", "artist": "Pearl Jam", "uri": "spotify:track:62nQ8C0zhqFaqO2iS5OR0E", "embed_url": "https://open.spotify.com/embed/track/62nQ8C0zhqFaqO2iS5OR0E", "image_url": "https://picsum.photos/300/200?random=37"},
+        {"title": "Outshined", "artist": "Soundgarden", "uri": "spotify:track:5F2bG7S1UdL0TShq1L2xPn", "embed_url": "https://open.spotify.com/embed/track/5F2bG7S1UdL0TShq1L2xPn", "image_url": "https://picsum.photos/300/200?random=38"},
+        {"title": "Heart-Shaped Box", "artist": "Nirvana", "uri": "spotify:track:0k2f6eOwYkVD7p7nNusvR7", "embed_url": "https://open.spotify.com/embed/track/0k2f6eOwYkVD7p7nNusvR7", "image_url": "https://picsum.photos/300/200?random=39"},
+        {"title": "Even Flow", "artist": "Pearl Jam", "uri": "spotify:track:2j3W34XqWkuS0r1bR5v9G", "embed_url": "https://open.spotify.com/embed/track/2j3W34XqWkuS0r1bR5v9G", "image_url": "https://picsum.photos/300/200?random=40"}
+    ],
+    "indie": [
+        {"title": "The Night We Met", "artist": "Lord Huron", "uri": "spotify:track:3hRV0jL3v2idF0VWHyGbdG", "embed_url": "https://open.spotify.com/embed/track/3hRV0jL3v2idF0VWHyGbdG", "image_url": "https://picsum.photos/300/200?random=41"},
+        {"title": "First Day of My Life", "artist": "Bright Eyes", "uri": "spotify:track:5F2bG7S1UdL0TShq1L2xPn", "embed_url": "https://open.spotify.com/embed/track/5F2bG7S1UdL0TShq1L2xPn", "image_url": "https://picsum.photos/300/200?random=42"},
+        {"title": "Two Weeks", "artist": "Grizzly Bear", "uri": "spotify:track:0k2f6eOwYkVD7p7nNusvR7", "embed_url": "https://open.spotify.com/embed/track/0k2f6eOwYkVD7p7nNusvR7", "image_url": "https://picsum.photos/300/200?random=43"},
+        {"title": "Ho Hey", "artist": "The Lumineers", "uri": "spotify:track:0W4Kpfp1PFmFtq1C4v1hS6", "embed_url": "https://open.spotify.com/embed/track/0W4Kpfp1PFmFtq1C4v1hS6", "image_url": "https://picsum.photos/300/200?random=44"},
+        {"title": "Little Talks", "artist": "Of Monsters and Men", "uri": "spotify:track:2ihCaVdOVNjyP50vCndtTA", "embed_url": "https://open.spotify.com/embed/track/2ihCaVdOVNjyP50vCndtTA", "image_url": "https://picsum.photos/300/200?random=45"},
+        {"title": "Skinny Love", "artist": "Bon Iver", "uri": "spotify:track:5F2bG7S1UdL0TShq1L2xPn", "embed_url": "https://open.spotify.com/embed/track/5F2bG7S1UdL0TShq1L2xPn", "image_url": "https://picsum.photos/300/200?random=46"},
+        {"title": "Pumped Up Kicks", "artist": "Foster the People", "uri": "spotify:track:7w87IxuO7BDcJ3YUqCysoA", "embed_url": "https://open.spotify.com/embed/track/7w87IxuO7BDcJ3YUqCysoA", "image_url": "https://picsum.photos/300/200?random=47"},
+        {"title": "Electric Feel", "artist": "MGMT", "uri": "spotify:track:3FtYbEf0x0DcltMqnzdwuz", "embed_url": "https://open.spotify.com/embed/track/3FtYbEf0x0DcltMqnzdwuz", "image_url": "https://picsum.photos/300/200?random=48"}
+    ],
+    "metal": [
+        {"title": "Master of Puppets", "artist": "Metallica", "uri": "spotify:track:0C80W3LHToP1Hm", "embed_url": "https://open.spotify.com/embed/track/0C80W3LHToP1Hm", "image_url": "https://picsum.photos/300/200?random=49"},
+        {"title": "Paranoid", "artist": "Black Sabbath", "uri": "spotify:track:5b7OgHYeJ7uS0Y0dXnE5zG", "embed_url": "https://open.spotify.com/embed/track/5b7OgHYeJ7uS0Y0dXnE5zG", "image_url": "https://picsum.photos/300/200?random=50"},
+        {"title": "Chop Suey!", "artist": "System of a Down", "uri": "spotify:track:5F2bG7S1UdL0TShq1L2xPn", "embed_url": "https://open.spotify.com/embed/track/5F2bG7S1UdL0TShq1L2xPn", "image_url": "https://picsum.photos/300/200?random=51"},
+        {"title": "Iron Man", "artist": "Black Sabbath", "uri": "spotify:track:0k2f6eOwYkVD7p7nNusvR7", "embed_url": "https://open.spotify.com/embed/track/0k2f6eOwYkVD7p7nNusvR7", "image_url": "https://picsum.photos/300/200?random=52"},
+        {"title": "Raining Blood", "artist": "Slayer", "uri": "spotify:track:2j3W34XqWkuS0r1bR5v9G", "embed_url": "https://open.spotify.com/embed/track/2j3W34XqWkuS0r1bR5v9G", "image_url": "https://picsum.photos/300/200?random=53"},
+        {"title": "The Trooper", "artist": "Iron Maiden", "uri": "spotify:track:5F2bG7S1UdL0TShq1L2xPn", "embed_url": "https://open.spotify.com/embed/track/5F2bG7S1UdL0TShq1L2xPn", "image_url": "https://picsum.photos/300/200?random=54"},
+        {"title": "Toxicity", "artist": "System of a Down", "uri": "spotify:track:0k2f6eOwYkVD7p7nNusvR7", "embed_url": "https://open.spotify.com/embed/track/0k2f6eOwYkVD7p7nNusvR7", "image_url": "https://picsum.photos/300/200?random=55"},
+        {"title": "Run to the Hills", "artist": "Iron Maiden", "uri": "spotify:track:2j3W34XqWkuS0r1bR5v9G", "embed_url": "https://open.spotify.com/embed/track/2j3W34XqWkuS0r1bR5v9G", "image_url": "https://picsum.photos/300/200?random=56"}
+    ],
+    "electronic": [
+        {"title": "Levels", "artist": "Avicii", "uri": "spotify:track:5UqCQvzqZ3LaC2bW0g4Xan", "embed_url": "https://open.spotify.com/embed/track/5UqCQvzqZ3LaC2bW0g4Xan", "image_url": "https://picsum.photos/300/200?random=57"},
+        {"title": "Clarity", "artist": "Zedd ft. Foxes", "uri": "spotify:track:60wwxj6DdG5PLkly1kHUkR", "embed_url": "https://open.spotify.com/embed/track/60wwxj6DdG5PLkly1kHUkR", "image_url": "https://picsum.photos/300/200?random=58"},
+        {"title": "Animals", "artist": "Martin Garrix", "uri": "spotify:track:5F2bG7S1UdL0TShq1L2xPn", "embed_url": "https://open.spotify.com/embed/track/5F2bG7S1UdL0TShq1L2xPn", "image_url": "https://picsum.photos/300/200?random=59"},
+        {"title": "Wake Me Up", "artist": "Avicii", "uri": "spotify:track:0k2f6eOwYkVD7p7nNusvR7", "embed_url": "https://open.spotify.com/embed/track/0k2f6eOwYkVD7p7nNusvR7", "image_url": "https://picsum.photos/300/200?random=60"},
+        {"title": "Strobe", "artist": "deadmau5", "uri": "spotify:track:2j3W34XqWkuS0r1bR5v9G", "embed_url": "https://open.spotify.com/embed/track/2j3W34XqWkuS0r1bR5v9G", "image_url": "https://picsum.photos/300/200?random=61"},
+        {"title": "Titanium", "artist": "David Guetta ft. Sia", "uri": "spotify:track:5F2bG7S1UdL0TShq1L2xPn", "embed_url": "https://open.spotify.com/embed/track/5F2bG7S1UdL0TShq1L2xPn", "image_url": "https://picsum.photos/300/200?random=62"},
+        {"title": "Don't You Worry Child", "artist": "Swedish House Mafia", "uri": "spotify:track:0k2f6eOwYkVD7p7nNusvR7", "embed_url": "https://open.spotify.com/embed/track/0k2f6eOwYkVD7p7nNusvR7", "image_url": "https://picsum.photos/300/200?random=63"},
+        {"title": "Firestone", "artist": "Kygo ft. Conrad Sewell", "uri": "spotify:track:2j3W34XqWkuS0r1bR5v9G", "embed_url": "https://open.spotify.com/embed/track/2j3W34XqWkuS0r1bR5v9G", "image_url": "https://picsum.photos/300/200?random=64"}
+    ]
+}

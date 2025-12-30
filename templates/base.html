@@ -3,15 +3,17 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="csrf-token" content="{{ csrf_token() }}">
     <title>{% block title %}Tuning{% endblock %}</title>
     <link rel="icon" type="image/x-icon" href="{{ url_for('static', filename='favicon.ico') }}">
     <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
     <link rel="stylesheet" href="{{ url_for('static', filename='css/base.css') }}">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
-    <script src="https://cdn.jsdelivr.net/npm/animejs/lib/anime.min.js"></script>
-    <!-- Incluye el Spotify Playback SDK -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/animejs/3.2.1/anime.min.js"></script>
+    <iframe id="player-iframe" src="{{ url_for('static', filename='player.html') }}" style="display: none;"></iframe>
+    <script src="{{ url_for('static', filename='js/main.js') }}"></script>
     <script src="https://sdk.scdn.co/spotify-player.js"></script>
-    <!-- Google Analytics -->
+    <script src="/static/js/main.js"></script>
     <script async src="https://www.googletagmanager.com/gtag/js?id=G-664125JDWY"></script>
     <script>
         window.dataLayer = window.dataLayer || [];
@@ -25,7 +27,25 @@
         }
         header.shrink {
             padding: 0.5rem 1rem;
-            background-color: rgba(31, 41, 55, 0.95); /* Oscurecer más el fondo (bg-gray-800 con opacidad) */
+            background-color: rgba(31, 41, 55, 0.95);
+        }
+        .logout-btn {
+            background: linear-gradient(90deg, #ff4d4d, #ff6666);
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-size: 14px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+            transition: all 0.3s ease;
+            color: white;
+            text-decoration: none;
+        }
+        .logout-btn:hover {
+            background: linear-gradient(90deg, #ff6666, #ff4d4d);
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
+            transform: translateY(-2px);
         }
     </style>
     {% block extra_css %}{% endblock %}
@@ -34,13 +54,21 @@
     <header class="bg-gray-800 p-4 fixed top-0 w-full z-50">
         <nav class="container mx-auto flex justify-between items-center">
             <a href="/" class="text-2xl font-bold text-white">Tuning</a>
-            <div>
+            <div class="flex items-center">
                 {% if 'user_id' in session %}
                     <span class="mr-4">Bienvenido, {{ session.user_name }}</span>
-                    <a href="/logout" class="text-red-500">Cerrar Sesión</a>
-                    {% if session.role == 1 %}
-                        <a href="/admin" class="ml-4 text-blue-500">Panel Admin</a>
+                    <!-- Convertir "Cerrar Sesión" en un botón -->
+                    <a href="/logout" class="logout-btn">Cerrar Sesión</a>
+                    <!-- Eliminar "Panel Admin" solo si estamos en la ruta /admin -->
+                    {% if session.role == 1 and request.endpoint != 'admin' %}
+                        <a href="/admin" class="text-blue-500 mr-4">Panel Admin</a>
                     {% endif %}
+                    <!-- Interruptor de Tema -->
+                    <div class="theme-switch-wrapper">
+                        <input type="checkbox" id="theme-switch">
+                        <label for="theme-switch" class="theme-switch-label"></label>
+                        <label for="theme-switch">Tema Claro/Oscuro</label>
+                    </div>
                 {% else %}
                     <a href="/login" class="mr-4 text-white">Iniciar Sesión</a>
                     <a href="/register" class="text-white">Registrarse</a>
@@ -49,8 +77,7 @@
         </nav>
     </header>
 
-    <main class="container mx-auto px-4 py-6 pt-20">
-        <!-- Barra de búsqueda: Solo visible si el usuario ha iniciado sesión y no está en la página inicial -->
+    <main class="container mx-auto px-4 py-6 pt-24">
         {% if 'user_id' in session and request.endpoint != 'index' %}
         <div class="mb-8">
             <h2 class="text-2xl font-semibold mb-4">Buscar Canciones</h2>
@@ -71,23 +98,28 @@
         window.spotifyToken = "{{ session.spotify_token }}";
     </script>
     {% endif %}
-    <!-- Pasar las playlists al JavaScript como un atributo data -->
     {% if 'user_id' in session and playlists is defined %}
     <script>
         window.playlists = {{ playlists | tojson }};
     </script>
     {% endif %}
     <script>
-        // Hacer que el header se reduzca al hacer scroll
         window.addEventListener('scroll', () => {
             const header = document.querySelector('header');
+            const main = document.querySelector('main');
             if (window.scrollY > 50) {
                 header.classList.add('shrink');
             } else {
                 header.classList.remove('shrink');
             }
+            main.style.paddingTop = `${header.offsetHeight}px`;
+        });
+        window.addEventListener('load', () => {
+            const header = document.querySelector('header');
+            const main = document.querySelector('main');
+            main.style.paddingTop = `${header.offsetHeight}px`;
         });
     </script>
     {% block extra_js %}{% endblock %}
-<script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'935917ad8e246758',t:'MTc0NTUzNDMyMi4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+</body>
 </html>

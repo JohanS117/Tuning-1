@@ -1,0 +1,47 @@
+```html
+{% extends 'base.html' %}
+{% block title %}Tuning - Panel de Artista{% endblock %}
+{% block content %}
+<div class="p-6">
+    <h1 class="text-3xl font-bold mb-6">Panel de Artista</h1>
+
+    {% if success %}
+    <div class="bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded relative mb-4">
+        {{ success }}
+    </div>
+    {% endif %}
+
+    <!-- Información del Perfil -->
+    <div class="bg-white dark:bg-gray-800 p-4 rounded-lg shadow mb-6">
+        <h2 class="text-2xl font-semibold mb-4">Perfil</h2>
+        <p class="text-gray-700 dark:text-gray-300"><strong>Nombre:</strong> {{ artist.name }}</p>
+        <p class="text-gray-700 dark:text-gray-300"><strong>Biografía:</strong> {{ artist.bio or 'No hay biografía disponible' }}</p>
+        <a href="{{ url_for('artist_edit_profile') }}" class="mt-2 inline-block text-blue-500 hover:underline">Editar Perfil</a>
+    </div>
+
+    <!-- Canciones -->
+    <div class="bg-white dark:bg-gray-800 p-4 rounded-lg shadow">
+        <div class="flex justify-between items-center mb-4">
+            <h2 class="text-2xl font-semibold">Tus Canciones</h2>
+            <a href="{{ url_for('artist_upload_song') }}" class="bg-blue-500 text-white py-2 px-4 rounded hover:bg-blue-600">Subir Canción</a>
+        </div>
+        {% if songs %}
+        <ul class="space-y-4">
+            {% for song in songs %}
+            <li class="border-b pb-2">
+                <p class="text-gray-700 dark:text-gray-300"><strong>{{ song.title }}</strong></p>
+                <p class="text-gray-500 dark:text-gray-400 text-sm">Subida el: {{ song.created_at.strftime('%Y-%m-%d %H:%M:%S') }}</p>
+                <audio controls class="mt-2">
+                    <source src="{{ song.file_url }}" type="audio/mpeg">
+                    Tu navegador no soporta el elemento de audio.
+                </audio>
+            </li>
+            {% endfor %}
+        </ul>
+        {% else %}
+        <p class="text-gray-600 dark:text-gray-300">No has subido canciones aún.</p>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}
+```

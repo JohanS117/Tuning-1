@@ -1,0 +1,572 @@
+{% extends 'base.html' %}
+{% block title %}Tuning - Gestionar Playlist{% endblock %}
+{% block content %}
+<div id="section-content" class="p-4 md:p-6">
+    <h1 class="text-3xl font-bold mb-6">Gestionar Playlist del Administrador</h1>
+    <div class="mb-8">
+        <h2 class="text-2xl font-semibold mb-4">Buscar Canciones</h2>
+        <input type="text" id="admin-search-input" class="w-full p-2 border rounded dark:bg-gray-700 dark:border-gray-600 dark:text-white light:bg-white light:border-gray-300 light:text-black" placeholder="Busca una canción...">
+        <div id="admin-search-results" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 mt-4"></div>
+    </div>
+    <div class="mb-8">
+        <h2 class="text-2xl font-semibold mb-4">Playlist del Administrador</h2>
+        <div class="flex flex-col sm:flex-row items-center gap-4 mb-4">
+            <button id="play-playlist-btn" class="w-full sm:w-auto bg-blue-500 text-white py-2 px-4 rounded hover:bg-blue-600 transition">Reproducir Playlist</button>
+            <button id="pause-btn" class="w-full sm:w-auto bg-yellow-500 text-white py-2 px-4 rounded hover:bg-yellow-600 transition">Pausar</button>
+            <button id="next-btn" class="w-full sm:w-auto bg-green-500 text-white py-2 px-4 rounded hover:bg-green-600 transition">Siguiente</button>
+            <button id="prev-btn" class="w-full sm:w-auto bg-green-500 text-white py-2 px-4 rounded hover:bg-green-600 transition">Anterior</button>
+            <button id="voice-command-btn" class="w-full sm:w-auto bg-blue-500 text-white py-2 px-4 rounded hover:bg-blue-600 transition">🎙️ Comandos de Voz</button>
+        </div>
+        <div id="admin-playlist-songs" class="space-y-4"></div>
+    </div>
+</div>
+
+<style>
+    .light-theme #admin-search-input {
+        background-color: #ffffff;
+        border-color: #d1d5db;
+        color: #000000;
+    }
+    .dark-theme #admin-search-input {
+        background-color: #374151;
+        border-color: #4b5563;
+        color: #ffffff;
+    }
+    .light-theme #admin-search-results .song-item {
+        background-color: #f3f4f6;
+        color: #000000;
+    }
+    .dark-theme #admin-search-results .song-item {
+        background-color: #374151;
+        color: #ffffff;
+    }
+    .light-theme #admin-playlist-songs .song-item {
+        background-color: #f3f4f6;
+    }
+    .dark-theme #admin-playlist-songs .song-item {
+        background-color: #374151;
+    }
+    .light-theme #admin-playlist-songs .song-item p {
+        color: #000000;
+    }
+    .dark-theme #admin-playlist-songs .song-item p {
+        color: #ffffff;
+    }
+    .song-item {
+        transition: transform 0.3s ease, opacity 0.3s ease;
+        touch-action: none;
+    }
+    .song-item.dragging {
+        opacity: 0.7;
+        border: 2px dashed #ffd700;
+        transform: scale(1.05);
+    }
+    .song-item.drag-over {
+        border-top: 2px solid #ffd700;
+    }
+    .song-item.playing {
+        background-color: #4b5563;
+        box-shadow: 0 0 10px rgba(255, 215, 0, 0.5);
+    }
+    @media (max-width: 640px) {
+        .song-item {
+            flex-direction: column;
+            text-align: center;
+        }
+        .song-item img {
+            margin-bottom: 1rem;
+        }
+        .song-item .flex {
+            flex-direction: column;
+            gap: 0.5rem;
+        }
+    }
+</style>
+
+<script src="https://cdn.jsdelivr.net/npm/animejs@3.2.1/lib/anime.min.js"></script>
+<script>
+    const playlistSongs = document.getElementById('admin-playlist-songs');
+    const searchResults = document.getElementById('admin-search-results');
+    const playPlaylistBtn = document.getElementById('play-playlist-btn');
+    const pauseBtn = document.getElementById('pause-btn');
+    const nextBtn = document.getElementById('next-btn');
+    const prevBtn = document.getElementById('prev-btn');
+    let draggedItem = null;
+    let currentPlayingUri = null;
+    const playerIframe = document.getElementById('player-iframe');
+
+    if (playlistSongs) {
+        // Eventos de mouse
+        document.addEventListener('dragstart', handleDragStart);
+        document.addEventListener('dragend', handleDragEnd);
+        playlistSongs.addEventListener('dragover', handleDragOver);
+        playlistSongs.addEventListener('dragenter', handleDragEnter);
+        playlistSongs.addEventListener('dragleave', handleDragLeave);
+        playlistSongs.addEventListener('drop', handleDrop);
+
+        // Eventos táctiles
+        document.addEventListener('touchstart', handleTouchStart, { passive: false });
+        document.addEventListener('touchmove', handleTouchMove, { passive: false });
+        document.addEventListener('touchend', handleTouchEnd, { passive: false });
+
+        function handleDragStart(e) {
+            if (e.target.classList.contains('song-item')) {
+                draggedItem = e.target;
+                e.target.classList.add('dragging');
+                anime({
+                    targets: draggedItem,
+                    scale: 1.05,
+                    opacity: 0.7,
+                    duration: 200,
+                    easing: 'easeOutQuad'
+                });
+            }
+        }
+
+        function handleDragEnd(e) {
+            if (e.target.classList.contains('song-item')) {
+                e.target.classList.remove('dragging');
+                anime({
+                    targets: draggedItem,
+                    scale: 1,
+                    opacity: 1,
+                    duration: 200,
+                    easing: 'easeOutQuad'
+                });
+                reorderPlaylist();
+                draggedItem = null;
+            }
+        }
+
+        function handleDragOver(e) {
+            e.preventDefault();
+            const afterElement = getDragAfterElement(playlistSongs, e.clientY);
+            if (draggedItem && afterElement !== draggedItem) {
+                if (afterElement == null) playlistSongs.appendChild(draggedItem);
+                else playlistSongs.insertBefore(draggedItem, afterElement);
+            }
+        }
+
+        function handleDragEnter(e) {
+            if (e.target.classList.contains('song-item') && e.target !== draggedItem) {
+                e.target.classList.add('drag-over');
+            }
+        }
+
+        function handleDragLeave(e) {
+            if (e.target.classList.contains('song-item')) e.target.classList.remove('drag-over');
+        }
+
+        function handleDrop(e) {
+            e.preventDefault();
+            if (draggedItem && draggedItem.parentElement === searchResults) {
+                addSongToPlaylist(draggedItem);
+            }
+        }
+
+        function handleTouchStart(e) {
+            const touch = e.touches[0];
+            const target = touch.target.closest('.song-item');
+            if (target) {
+                e.preventDefault();
+                draggedItem = target;
+                draggedItem.classList.add('dragging');
+                draggedItem.style.position = 'absolute';
+                moveElement(touch);
+                anime({
+                    targets: draggedItem,
+                    scale: 1.05,
+                    opacity: 0.7,
+                    duration: 200,
+                    easing: 'easeOutQuad'
+                });
+            }
+        }
+
+        function handleTouchMove(e) {
+            if (draggedItem) {
+                e.preventDefault();
+                const touch = e.touches[0];
+                moveElement(touch);
+                const afterElement = getDragAfterElement(playlistSongs, touch.clientY);
+                if (afterElement && afterElement !== draggedItem) {
+                    playlistSongs.insertBefore(draggedItem, afterElement);
+                } else if (!afterElement) {
+                    playlistSongs.appendChild(draggedItem);
+                }
+            }
+        }
+
+        function handleTouchEnd(e) {
+            if (draggedItem) {
+                draggedItem.classList.remove('dragging');
+                draggedItem.style.position = '';
+                anime({
+                    targets: draggedItem,
+                    scale: 1,
+                    opacity: 1,
+                    duration: 200,
+                    easing: 'easeOutQuad'
+                });
+                if (draggedItem.parentElement === searchResults) {
+                    addSongToPlaylist(draggedItem);
+                } else {
+                    reorderPlaylist();
+                }
+                draggedItem = null;
+            }
+        }
+
+        function moveElement(touch) {
+            draggedItem.style.left = `${touch.pageX - draggedItem.offsetWidth / 2}px`;
+            draggedItem.style.top = `${touch.pageY - draggedItem.offsetHeight / 2}px`;
+        }
+
+        function reorderPlaylist() {
+            const songs = Array.from(playlistSongs.querySelectorAll('.song-item'));
+            const newOrder = songs.map(song => song.getAttribute('data-uri'));
+            songs.forEach((song, index) => {
+                anime({
+                    targets: song,
+                    translateY: [20, 0],
+                    opacity: [0.5, 1],
+                    delay: index * 100,
+                    duration: 300,
+                    easing: 'easeOutQuad'
+                });
+            });
+            fetch('/admin_manage_playlist', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+                body: `action=reorder&song_uris=${encodeURIComponent(JSON.stringify(newOrder))}`
+            })
+            .then(response => response.json())
+            .then(result => {
+                if (result.success) showNotification(result.message, 'success');
+                else showNotification(result.error, 'error');
+            })
+            .catch(error => {
+                console.error('Error al reordenar:', error);
+                showNotification('Error al reordenar la playlist', 'error');
+            });
+        }
+
+        function addSongToPlaylist(item) {
+            const uri = item.getAttribute('data-uri');
+            const title = item.getAttribute('data-title');
+            const artist = item.getAttribute('data-artist');
+            const imageUrl = item.getAttribute('data-image-url');
+            const newSongItem = createSongItem(uri, title, artist, imageUrl);
+            playlistSongs.appendChild(newSongItem);
+            anime({
+                targets: newSongItem,
+                translateY: [20, 0],
+                opacity: [0, 1],
+                duration: 300,
+                easing: 'easeOutQuad'
+            });
+            fetch('/admin_manage_playlist', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+                body: `action=add&song_uri=${encodeURIComponent(uri)}`
+            })
+            .then(response => response.json())
+            .then(result => {
+                if (result.success) {
+                    showNotification(result.message, 'success');
+                    newSongItem.querySelector('.remove-song').addEventListener('click', handleRemoveSong);
+                    newSongItem.querySelector('.play-button').addEventListener('click', handlePlaySong);
+                } else {
+                    showNotification(result.error, 'error');
+                    newSongItem.remove();
+                }
+            })
+            .catch(error => {
+                console.error('Error al agregar:', error);
+                showNotification('Error al agregar la canción', 'error');
+                newSongItem.remove();
+            });
+        }
+
+        function getDragAfterElement(container, y) {
+            const draggableElements = [...container.querySelectorAll('.song-item:not(.dragging)')];
+            return draggableElements.reduce((closest, child) => {
+                const box = child.getBoundingClientRect();
+                const offset = y - box.top - box.height / 2;
+                if (offset < 0 && offset > closest.offset) return { offset: offset, element: child };
+                return closest;
+            }, { offset: Number.NEGATIVE_INFINITY }).element;
+        }
+    }
+
+    function createSongItem(uri, title, artist, imageUrl) {
+        const newSongItem = document.createElement('div');
+        newSongItem.className = 'bg-gray-700 p-4 rounded-lg flex items-center justify-between song-item dark:bg-gray-700 light:bg-gray-200';
+        newSongItem.setAttribute('data-uri', uri);
+        newSongItem.setAttribute('draggable', 'true');
+        newSongItem.innerHTML = `
+            <div class="flex items-center space-x-4">
+                <img src="${imageUrl}" alt="${title}" class="w-12 h-12 object-cover rounded-md">
+                <div>
+                    <p class="text-white dark:text-white light:text-black">${title} - ${artist}</p>
+                </div>
+            </div>
+            <div class="flex gap-2">
+                <button class="play-button bg-green-500 text-white py-1 px-2 rounded hover:bg-green-600 transition" data-uri="${uri}" data-title="${title}" data-artist="${artist}" data-image-url="${imageUrl}">Reproducir</button>
+                <button class="remove-song bg-red-500 text-white py-1 px-2 rounded hover:bg-red-600 transition" data-uri="${uri}">Eliminar</button>
+            </div>
+        `;
+        return newSongItem;
+    }
+
+    function handleRemoveSong(e) {
+        const button = e.target;
+        const uri = button.getAttribute('data-uri');
+        const songItem = button.closest('.song-item');
+        anime({
+            targets: songItem,
+            opacity: 0,
+            translateY: 20,
+            duration: 300,
+            easing: 'easeInQuad',
+            complete: () => {
+                fetch('/admin_manage_playlist', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+                    body: `action=remove&song_uri=${encodeURIComponent(uri)}`
+                })
+                .then(response => response.json())
+                .then(result => {
+                    if (result.success) {
+                        songItem.remove();
+                        showNotification(result.message, 'success');
+                    } else showNotification(result.error, 'error');
+                })
+                .catch(error => {
+                    console.error('Error al eliminar:', error);
+                    showNotification('Error al eliminar la canción', 'error');
+                });
+            }
+        });
+    }
+
+    document.querySelectorAll('.remove-song').forEach(button => button.addEventListener('click', handleRemoveSong));
+
+    function handlePlaySong(e) {
+        const button = e.target;
+        const uri = button.getAttribute('data-uri');
+        const title = button.getAttribute('data-title');
+        const artist = button.getAttribute('data-artist');
+        const imageUrl = button.getAttribute('data-image-url');
+        if (playerIframe) {
+            playerIframe.contentWindow.postMessage({
+                type: 'playTrack',
+                uri: uri,
+                title: title,
+                artist: artist,
+                image_url: imageUrl
+            }, '*');
+            showNotification(`Reproduciendo ${title}`, 'success');
+        } else showNotification('Error: Reproductor no disponible', 'error');
+    }
+
+    document.querySelectorAll('.play-button').forEach(button => button.addEventListener('click', handlePlaySong));
+
+    playPlaylistBtn.addEventListener('click', () => {
+        const songItems = Array.from(playlistSongs.querySelectorAll('.song-item'));
+        const songs = songItems.map(item => ({
+            uri: item.getAttribute('data-uri'),
+            title: item.querySelector('p').textContent.split(' - ')[0],
+            artist: item.querySelector('p').textContent.split(' - ')[1],
+            image_url: item.querySelector('img').src
+        }));
+        if (songs.length === 0) {
+            showNotification('La playlist está vacía', 'error');
+            return;
+        }
+        if (playerIframe) {
+            playerIframe.contentWindow.postMessage({ type: 'playPlaylist', songs: songs }, '*');
+            showNotification('Reproduciendo la playlist', 'success');
+        } else showNotification('Error: Reproductor no disponible', 'error');
+    });
+
+    pauseBtn.addEventListener('click', () => {
+        if (playerIframe) playerIframe.contentWindow.postMessage({ type: 'pause' }, '*');
+    });
+
+    nextBtn.addEventListener('click', () => {
+        if (playerIframe) playerIframe.contentWindow.postMessage({ type: 'next' }, '*');
+    });
+
+    prevBtn.addEventListener('click', () => {
+        if (playerIframe) playerIframe.contentWindow.postMessage({ type: 'previous' }, '*');
+    });
+
+    window.addEventListener('message', (event) => {
+        if (event.data.type === 'playerStateChanged') {
+            const { uri, isPlaying } = event.data;
+            document.querySelectorAll('.song-item').forEach(item => item.classList.remove('playing'));
+            if (isPlaying) {
+                const playingItem = document.querySelector(`.song-item[data-uri="${uri}"]`);
+                if (playingItem) playingItem.classList.add('playing');
+            }
+        }
+    });
+
+document.getElementById('voice-command-btn').addEventListener('click', () => {
+    let mediaRecorder;
+    let audioChunks = [];
+
+    navigator.mediaDevices.getUserMedia({ audio: true })
+        .then(stream => {
+            mediaRecorder = new MediaRecorder(stream);
+            mediaRecorder.ondataavailable = event => audioChunks.push(event.data);
+            mediaRecorder.onstop = () => {
+                const audioBlob = new Blob(audioChunks, { type: 'audio/wav' });
+                const formData = new FormData();
+                formData.append('audio', audioBlob, 'command.wav');
+
+                fetch('/voice-command', {
+                    method: 'POST',
+                    body: formData
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        showNotification(data.message, 'success');
+                        if (playerIframe) {
+                            playerIframe.contentWindow.postMessage({ type: data.action }, '*');
+                        }
+                    } else {
+                        showNotification(data.error, 'error');
+                    }
+                })
+                .catch(error => showNotification('Error al procesar el comando', 'error'));
+                audioChunks = [];
+            };
+
+            mediaRecorder.start();
+            showNotification('Grabando... Habla ahora.', 'info');
+            setTimeout(() => mediaRecorder.stop(), 3000);
+        })
+        .catch(error => showNotification('Error al acceder al micrófono', 'error'));
+});
+
+    const searchInput = document.getElementById('admin-search-input');
+    if (searchInput && searchResults) {
+        searchInput.addEventListener('input', async (e) => {
+            const query = e.target.value.trim();
+            if (query.length < 3) {
+                searchResults.innerHTML = '';
+                return;
+            }
+            try {
+                const response = await fetch(`/search_songs?query=${encodeURIComponent(query)}`);
+                const results = await response.json();
+                if (response.ok) {
+                    searchResults.innerHTML = results.map(song => `
+                        <div class="bg-gray-700 p-3 rounded-lg shadow-md song-item dark:bg-gray-700 light:bg-gray-200" data-uri="${song.uri}" data-title="${song.title}" data-artist="${song.artist}" data-image-url="${song.image_url || 'https://picsum.photos/200/200?random=1'}" draggable="true">
+                            <img src="${song.image_url || 'https://picsum.photos/200/200?random=1'}" alt="${song.title}" class="w-full h-32 object-cover rounded-md mb-2">
+                            <h3 class="text-base font-semibold truncate text-white dark:text-white light:text-black">${song.title}</h3>
+                            <p class="text-gray-300 dark:text-gray-300 light:text-gray-600 text-sm truncate">${song.artist}</p>
+                            <button class="add-song bg-blue-500 text-white py-1 px-2 rounded hover:bg-blue-600 transition mt-2" data-uri="${song.uri}" data-title="${song.title}" data-artist="${song.artist}" data-image-url="${song.image_url || 'https://picsum.photos/200/200?random=1'}">Agregar</button>
+                        </div>
+                    `).join('');
+                    const resultItems = searchResults.querySelectorAll('.song-item');
+                    resultItems.forEach((item, index) => {
+                        anime({
+                            targets: item,
+                            translateY: [20, 0],
+                            opacity: [0, 1],
+                            delay: index * 100,
+                            duration: 300,
+                            easing: 'easeOutQuad'
+                        });
+                    });
+                    searchResults.querySelectorAll('.add-song').forEach(button => {
+                        button.addEventListener('click', () => {
+                            const uri = button.getAttribute('data-uri');
+                            fetch('/admin_manage_playlist', {
+                                method: 'POST',
+                                headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+                                body: `action=add&song_uri=${encodeURIComponent(uri)}`
+                            })
+                            .then(response => response.json())
+                            .then(result => {
+                                if (result.success) {
+                                    showNotification(result.message, 'success');
+                                    const title = button.getAttribute('data-title');
+                                    const artist = button.getAttribute('data-artist');
+                                    const imageUrl = button.getAttribute('data-image-url');
+                                    const newSongItem = createSongItem(uri, title, artist, imageUrl);
+                                    playlistSongs.appendChild(newSongItem);
+                                    anime({
+                                        targets: newSongItem,
+                                        translateY: [20, 0],
+                                        opacity: [0, 1],
+                                        duration: 300,
+                                        easing: 'easeOutQuad'
+                                    });
+                                    newSongItem.querySelector('.remove-song').addEventListener('click', handleRemoveSong);
+                                    newSongItem.querySelector('.play-button').addEventListener('click', handlePlaySong);
+                                } else showNotification(result.error, 'error');
+                            })
+                            .catch(error => {
+                                console.error('Error al agregar:', error);
+                                showNotification('Error al agregar la canción', 'error');
+                            });
+                        });
+                    });
+                } else searchResults.innerHTML = '<p class="text-red-500">Error al buscar canciones.</p>';
+            } catch (error) {
+                console.error('Error al buscar:', error);
+                searchResults.innerHTML = '<p class="text-red-500">Error al buscar canciones.</p>';
+            }
+        });
+    }
+
+    function showNotification(message, type = 'info') {
+        const header = document.querySelector('header');
+        const headerHeight = header ? header.offsetHeight : 0;
+        const notification = document.createElement('div');
+        notification.className = `fixed right-4 p-4 rounded-lg shadow-lg text-white z-60`;
+        notification.textContent = message;
+        const styles = {
+            success: 'bg-green-500',
+            error: 'bg-red-500',
+            info: 'bg-blue-500',
+            warning: 'bg-yellow-500'
+        };
+        notification.classList.add(styles[type] || styles.info);
+        document.body.appendChild(notification);
+        notification.style.top = `${headerHeight + 16}px`;
+        anime({
+            targets: notification,
+            translateX: [300, 0],
+            opacity: [0, 1],
+            easing: 'easeOutQuad',
+            duration: 400,
+            complete: () => {
+                setTimeout(() => {
+                    anime({
+                        targets: notification,
+                        translateX: 300,
+                        opacity: 0,
+                        easing: 'easeInQuad',
+                        duration: 400,
+                        complete: () => notification.remove()
+                    });
+                }, 3000);
+            }
+        });
+    }
+
+    // Cargar canciones iniciales de la playlist
+    {% for song in admin_playlist_songs %}
+        const initialSong = createSongItem('{{ song.uri }}', '{{ song.title }}', '{{ song.artist }}', '{{ song.image_url or 'https://picsum.photos/50/50?random=1' }}');
+        playlistSongs.appendChild(initialSong);
+        initialSong.querySelector('.remove-song').addEventListener('click', handleRemoveSong);
+        initialSong.querySelector('.play-button').addEventListener('click', handlePlaySong);
+    {% endfor %}
+</script>
+{% endblock %}

@@ -1,0 +1,75 @@
+{% extends 'base.html' %}
+{% block title %}Tuning - Noticias{% endblock %}
+{% block content %}
+<div class="p-6">
+    <h1 class="text-3xl font-bold mb-6">Noticias</h1>
+    <div class="mb-4">
+        <input type="text" id="search-input" class="w-full p-2 border rounded dark:bg-gray-700 dark:border-gray-600 dark:text-white" placeholder="Buscar noticias...">
+    </div>
+    <a href="{{ url_for('create_news') }}" class="bg-blue-500 text-white py-2 px-4 rounded hover:bg-blue-600 mb-4 inline-block">Crear Noticia</a>
+    <div class="grid grid-cols-1 gap-4" id="news-list">
+        {% for item in news %}
+        <div class="bg-white dark:bg-gray-800 p-4 rounded-lg shadow news-item" data-id="{{ item.id }}">
+            <h3 class="text-xl font-semibold">{{ item.title }}</h3>
+            <p class="text-gray-700 dark:text-gray-300">{{ item.content }}</p>
+            <p class="text-gray-500 dark:text-gray-400 text-sm">Creada el: {{ item.created_at.strftime('%Y-%m-%d %H:%M:%S') }}</p>
+            <div class="mt-2">
+                <a href="{{ url_for('edit_news', id=item.id) }}" class="text-blue-500 hover:underline">Editar</a>
+                <a href="{{ url_for('delete_news', id=item.id) }}" class="text-red-500 hover:underline ml-4 delete-news" onclick="return confirm('¿Estás seguro de eliminar esta noticia?');">Eliminar</a>
+            </div>
+        </div>
+        {% else %}
+        <p class="text-gray-600 dark:text-gray-300">No hay noticias disponibles.</p>
+        {% endfor %}
+    </div>
+</div>
+
+<!-- Incluir Anime.js desde CDN -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/animejs/3.2.1/anime.min.js"></script>
+<script>
+    document.addEventListener('DOMContentLoaded', () => {
+        // Animación de entrada
+        anime({
+            targets: '.news-item',
+            translateY: [50, 0],
+            opacity: [0, 1],
+            duration: 800,
+            easing: 'easeOutQuad',
+            delay: anime.stagger(100)
+        });
+
+        // Manejar eliminación con animación
+        document.querySelectorAll('.delete-news').forEach(link => {
+            link.addEventListener('click', function(event) {
+                event.preventDefault();
+                const newsItem = this.closest('.news-item');
+                anime({
+                    targets: newsItem,
+                    opacity: 0,
+                    duration: 500,
+                    easing: 'easeOutQuad',
+                    complete: () => {
+                        window.location.href = this.href;
+                    }
+                });
+            });
+        });
+
+        // Búsqueda de noticias
+        const searchInput = document.getElementById('search-input');
+        const newsItems = document.querySelectorAll('.news-item');
+        searchInput.addEventListener('input', () => {
+            const query = searchInput.value.toLowerCase();
+            newsItems.forEach(item => {
+                const title = item.querySelector('h3').textContent.toLowerCase();
+                const content = item.querySelector('p').textContent.toLowerCase();
+                if (title.includes(query) || content.includes(query)) {
+                    item.style.display = 'block';
+                } else {
+                    item.style.display = 'none';
+                }
+            });
+        });
+    });
+</script>
+{% endblock %}

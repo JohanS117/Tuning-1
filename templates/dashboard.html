@@ -1,30 +1,47 @@
 {% extends 'base.html' %}
 {% block title %}Tuning - Dashboard{% endblock %}
 {% block content %}
-
+<script src="https://cdnjs.cloudflare.com/ajax/libs/animejs/3.2.1/anime.min.js"></script>
 <section class="dashboard-container max-w-4xl mx-auto p-6">
     <h1 class="text-3xl font-bold mb-6">😎Hola, {{ session.user_name }}!</h1>
+    <!-- Botón para artistas -->
+    {% if session.role == 3 %}
+    <div class="mb-4">
+        <a href="{{ url_for('artist_dashboard') }}" class="bg-purple-500 text-white py-2 px-4 rounded hover:bg-purple-600 transition">Ir al Panel de Artista</a>
+    </div>
+    {% endif %}
+
+    {% if session.role == 2 %}
+<div class="mb-4">
+    <a href="{{ url_for('artists') }}" class="bg-yellow-500 text-white py-2 px-4 rounded hover:bg-yellow-600 transition">Visitar Página de Artistas</a>
+</div>
+{% endif %}
 
     <!-- Botón para conectar con Spotify -->
     {% if not 'spotify_token' in session %}
     <div class="mb-8">
         <h2 class="text-2xl font-semibold mb-4">Conectar con Spotify</h2>
-        <p class="text-gray-600 dark:text-gray-300 mb-4">Conecta tu cuenta de Spotify para obtener recomendaciones personalizadas.</p>
+        <p class="text-gray-600 dark:text-gray-300 mb-4">Conecta tu cuenta de Spotify para disfrutar de la reproducción directa.</p>
         <a href="/login-spotify" class="bg-green-500 text-white py-2 px-4 rounded hover:bg-green-600 transition">Conectar con Spotify</a>
     </div>
     {% endif %}
+
+    <button id="voice-command-btn" class="bg-blue-500 text-white py-2 px-4 rounded hover:bg-blue-600 transition">
+        🎙️ Comandos de Voz
+    </button>
 
     <!-- Playlists -->
     <div class="mb-8">
         <h2 class="text-2xl font-semibold mb-4">Tus Playlists</h2>
         <!-- Formulario para crear una nueva playlist -->
         <form class="create-playlist-form flex items-center gap-4" method="POST" action="/create_playlist">
+            {{ create_playlist_form.hidden_tag() }}
             <div class="flex items-center gap-4">
                 <div class="flex-1">
                     <label for="playlist-name" class="block text-sm font-medium mb-2">Nombre de la Playlist</label>
-                    <input type="text" id="playlist-name" name="playlist_name" placeholder="Nombre de la playlist" class="p-2 border rounded dark:bg-gray-700 dark:border-gray-600 dark:text-white">
+                    {{ create_playlist_form.playlist_name(id="playlist-name", placeholder="Nombre de la playlist", class="p-2 border rounded dark:bg-gray-700 dark:border-gray-600 dark:text-white") }}
                 </div>
-                <button type="submit" id="submit-playlist" class="bg-blue-500 text-white py-2 px-4 rounded hover:bg-blue-600 transition">Crear Playlist</button>
+                {{ create_playlist_form.submit(id="submit-playlist", class="bg-blue-500 text-white py-2 px-4 rounded hover:bg-blue-600 transition") }}
             </div>
         </form>
 
@@ -76,29 +93,53 @@
         {% endif %}
     </div>
 
-    <!-- Sección de canciones recomendadas -->
+    <!-- Nuevos Lanzamientos -->
+    <h2 class="text-2xl font-semibold mb-4">Nuevos Lanzamientos</h2>
+    <div class="relative overflow-hidden">
+        <button id="new-releases-left-btn" class="absolute top-1/2 left-0 transform -translate-y-1/2 bg-black bg-opacity-50 p-2 text-2xl z-10">←</button>
+        <div id="new-releases-slider" class="flex transition-transform duration-500 ease-in-out">
+            {% for song in new_releases %}
+            <div class="min-w-[200px] mx-2 rounded">
+                <div class="relative">
+                    <img src="{{ song.image_url | default('https://picsum.photos/200/200?random=1') }}" alt="{{ song.title }}" class="w-full h-48 object-cover rounded-md mb-4">
+                    <button class="play-button absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 text-white text-4xl opacity-50 hover:opacity-100 transition-opacity" data-uri="{{ song.uri }}" data-title="{{ song.title }}" data-artist="{{ song.artist }}">►</button>
+                </div>
+                <h3 class="text-lg font-semibold truncate">{{ song.title }}</h3>
+                <p class="text-gray-600 dark:text-gray-300 truncate">{{ song.artist }}</p>
+                <form class="add-to-playlist-form mt-2 flex items-center gap-2" method="POST" action="/add_to_playlist">
+                    {{ add_to_playlist_form.hidden_tag() }}
+                    {{ add_to_playlist_form.song_uri(value=song.uri) }}
+                    {{ add_to_playlist_form.song_title(value=song.title) }}
+                    {{ add_to_playlist_form.song_artist(value=song.artist) }}
+                    {{ add_to_playlist_form.playlist_id(class="p-1 text-sm border rounded dark:bg-gray-700 dark:border-gray-600 dark:text-white", choices=playlist_choices) }}
+                    <button type="submit" class="bg-blue-500 text-white py-1 px-2 text-sm rounded hover:bg-blue-600 transition">Agregar</button>
+                </form>
+            </div>
+            {% endfor %}
+        </div>
+        <button id="new-releases-right-btn" class="absolute top-1/2 right-0 transform -translate-y-1/2 bg-black bg-opacity-50 p-2 text-2xl z-10">→</button>
+    </div>
+
+    <!-- Canciones Recomendadas -->
     <h2 class="text-2xl font-semibold mb-4">Canciones Recomendadas</h2>
+    <button id="refresh-recommendations" class="bg-blue-500 text-white py-2 px-4 rounded hover:bg-blue-600 transition mt-4">Refrescar Recomendaciones</button>
     <div class="relative overflow-hidden">
         <button id="recommended-left-btn" class="absolute top-1/2 left-0 transform -translate-y-1/2 bg-black bg-opacity-50 p-2 text-2xl z-10">←</button>
         <div id="recommended-slider" class="flex transition-transform duration-500 ease-in-out">
             {% for song in recommended_songs %}
             <div class="min-w-[200px] mx-2 rounded">
                 <div class="relative">
-                    <img src="{{ song.image_url }}" alt="{{ song.title }}" class="w-full h-48 object-cover rounded-md mb-4">
+                    <img src="{{ song.image_url | default('https://picsum.photos/200/200?random=1') }}" alt="{{ song.title }}" class="w-full h-48 object-cover rounded-md mb-4">
                     <button class="play-button absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 text-white text-4xl opacity-50 hover:opacity-100 transition-opacity" data-uri="{{ song.uri }}" data-title="{{ song.title }}" data-artist="{{ song.artist }}">►</button>
                 </div>
                 <h3 class="text-lg font-semibold truncate">{{ song.title }}</h3>
                 <p class="text-gray-600 dark:text-gray-300 truncate">{{ song.artist }}</p>
-                <form class="add-to-playlist-form mt-2 flex items-center gap-2" data-uri="{{ song.uri }}" data-title="{{ song.title }}" data-artist="{{ song.artist }}">
-                    <input type="hidden" name="song_uri" value="{{ song.uri }}">
-                    <input type="hidden" name="song_title" value="{{ song.title }}">
-                    <input type="hidden" name="song_artist" value="{{ song.artist }}">
-                    <select name="playlist_id" class="p-1 text-sm border rounded dark:bg-gray-700 dark:border-gray-600 dark:text-white">
-                        <option value="">Seleccionar Playlist</option>
-                        {% for playlist in playlists %}
-                        <option value="{{ playlist.id }}">{{ playlist.name }}</option>
-                        {% endfor %}
-                    </select>
+                <form class="add-to-playlist-form mt-2 flex items-center gap-2" method="POST" action="/add_to_playlist">
+                    {{ add_to_playlist_form.hidden_tag() }}
+                    {{ add_to_playlist_form.song_uri(value=song.uri) }}
+                    {{ add_to_playlist_form.song_title(value=song.title) }}
+                    {{ add_to_playlist_form.song_artist(value=song.artist) }}
+                    {{ add_to_playlist_form.playlist_id(class="p-1 text-sm border rounded dark:bg-gray-700 dark:border-gray-600 dark:text-white", choices=playlist_choices) }}
                     <button type="submit" class="bg-blue-500 text-white py-1 px-2 text-sm rounded hover:bg-blue-600 transition">Agregar</button>
                 </form>
             </div>
@@ -106,10 +147,28 @@
         </div>
         <button id="recommended-right-btn" class="absolute top-1/2 right-0 transform -translate-y-1/2 bg-black bg-opacity-50 p-2 text-2xl z-10">→</button>
     </div>
+    <!-- Canciones de Artistas -->
+<h2 class="text-2xl font-semibold mb-4 mt-8">Canciones de Artistas</h2>
+<div class="relative overflow-hidden">
+    <button id="artist-songs-left-btn" class="absolute top-1/2 left-0 transform -translate-y-1/2 bg-black bg-opacity-50 p-2 text-2xl z-10">←</button>
+    <div id="artist-songs-slider" class="flex transition-transform duration-500 ease-in-out">
+        {% for song in artist_songs %}
+        <div class="min-w-[200px] mx-2 rounded">
+            <div class="relative">
+                <img src="https://picsum.photos/200/200?random={{ loop.index }}" alt="{{ song.title }}" class="w-full h-48 object-cover rounded-md mb-4">
+                <button class="play-button absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 text-white text-4xl opacity-50 hover:opacity-100 transition-opacity" data-uri="{{ song.file_url }}" data-title="{{ song.title }}" data-artist="Artista">►</button>
+            </div>
+            <h3 class="text-lg font-semibold truncate">{{ song.title }}</h3>
+            <p class="text-gray-600 dark:text-gray-300 truncate">Artista</p>
+        </div>
+        {% endfor %}
+    </div>
+    <button id="artist-songs-right-btn" class="absolute top-1/2 right-0 transform -translate-y-1/2 bg-black bg-opacity-50 p-2 text-2xl z-10">→</button>
+</div>
 
-    <!-- Sección de canciones de la playlist del administrador -->
-    {% if admin_playlist_songs %}
-    <h2 class="text-2xl font-semibold mb-4 mt-8">Explora la Playlist del Administrador</h2>
+    <!-- Playlist del Administrador -->
+    {% if admin_playlist_songs and user_role == 1 %}
+    <h2 class="text-2xl font-semibold mb-4 mt-8">Gestionar Playlist del Administrador</h2>
     <div class="relative overflow-hidden">
         <button id="admin-left-btn" class="absolute top-1/2 left-0 transform -translate-y-1/2 bg-black bg-opacity-50 p-2 text-2xl z-10">←</button>
         <div id="admin-slider" class="flex transition-transform duration-500 ease-in-out">
@@ -121,18 +180,7 @@
                 </div>
                 <h3 class="text-lg font-semibold truncate">{{ song.title }}</h3>
                 <p class="text-gray-600 dark:text-gray-300 truncate">{{ song.artist }}</p>
-                <form class="add-to-playlist-form mt-2 flex items-center gap-2" data-uri="{{ song.uri }}" data-title="{{ song.title }}" data-artist="{{ song.artist }}">
-                    <input type="hidden" name="song_uri" value="{{ song.uri }}">
-                    <input type="hidden" name="song_title" value="{{ song.title }}">
-                    <input type="hidden" name="song_artist" value="{{ song.artist }}">
-                    <select name="playlist_id" class="p-1 text-sm border rounded dark:bg-gray-700 dark:border-gray-600 dark:text-white">
-                        <option value="">Seleccionar Playlist</option>
-                        {% for playlist in playlists %}
-                        <option value="{{ playlist.id }}">{{ playlist.name }}</option>
-                        {% endfor %}
-                    </select>
-                    <button type="submit" class="bg-blue-500 text-white py-1 px-2 text-sm rounded hover:bg-blue-600 transition">Agregar</button>
-                </form>
+                <button class="remove-song bg-red-500 text-white py-1 px-2 rounded hover:bg-red-600 transition" data-uri="{{ song.uri }}">Eliminar</button>
             </div>
             {% endfor %}
         </div>
@@ -177,35 +225,476 @@
         </div>
         {% endif %}
         <form method="POST" action="/submit_comment">
+            {{ comment_form.hidden_tag() }}
             <div class="mb-4">
                 <label for="comment" class="block text-sm font-medium mb-2">Comentario</label>
-                <textarea id="comment" name="comment" rows="3" class="w-full p-2 border rounded dark:bg-gray-700 dark:border-gray-600 dark:text-white" placeholder="Escribe tu comentario sobre la aplicación..." required></textarea>
+                {{ comment_form.comment(id="comment", rows="3", class="w-full p-2 border rounded dark:bg-gray-700 dark:border-gray-600 dark:text-white", placeholder="Escribe tu comentario sobre la aplicación...") }}
             </div>
             <button type="submit" class="bg-blue-500 text-white py-2 px-4 rounded hover:bg-blue-600 transition">Enviar Comentario</button>
         </form>
     </div>
 
-    <!-- Reproductor de Playlist -->
-    <div id="player" class="fixed bottom-0 left-0 w-full bg-gray-800 text-white p-4 flex items-center justify-between">
+    <!-- Reproductor de música -->
+    <div id="player" class="fixed bottom-0 left-0 w-full bg-gray-800 text-white p-4 flex items-center justify-between z-50">
         <div class="flex items-center">
             <img id="player-album" src="https://picsum.photos/50/50?random=1" alt="Album" class="w-12 h-12 object-cover rounded-md mr-4">
             <div>
-                <p id="player-title" class="text-lg font-semibold">Título</p>
+                <p id="player-title" class="text-lg font-semibold">Selecciona una canción</p>
                 <p id="player-artist" class="text-gray-300">Artista</p>
             </div>
         </div>
         <div class="flex-1 mx-4">
             <div class="progress-bar-container flex items-center">
                 <span id="current-time" class="text-sm mr-2">00:00</span>
-                <input type="range" id="progress-bar" class="w-full" min="0" max="100" value="0">
+                <input type="range" id="progress-bar" class="w-full" min="0" max="1000" value="0">
                 <span id="duration" class="text-sm ml-2">00:00</span>
             </div>
         </div>
-        <div class="flex items-center gap-4">
-            <button id="prev-track" class="bg-blue-500 text-white py-2 px-4 rounded hover:bg-blue-600 transition">Anterior</button>
-            <button id="play-pause" class="bg-green-500 text-white py-2 px-4 rounded hover:bg-green-600 transition">Pausar</button>
-            <button id="next-track" class="bg-blue-500 text-white py-2 px-4 rounded hover:bg-blue-600 transition">Siguiente</button>
+        <div class="flex items-center gap-2">
+            <button id="shuffle" class="bg-blue-500 text-white py-1 px-2 rounded hover:bg-blue-600 transition">🔀</button>
+            <button id="prev-track" class="bg-blue-500 text-white py-1 px-2 rounded hover:bg-blue-600 transition">⏮️</button>
+            <button id="play-pause" class="bg-green-500 text-white py-1 px-2 rounded hover:bg-green-600 transition">⏯️</button>
+            <button id="next-track" class="bg-blue-500 text-white py-1 px-2 rounded hover:bg-blue-600 transition">⏭️</button>
+            <button id="loop" class="bg-blue-500 text-white py-1 px-2 rounded hover:bg-blue-600 transition">🔁</button>
+            <div class="flex items-center">
+                <button id="mute" class="bg-blue-500 text-white py-1 px-2 rounded hover:bg-blue-600 transition">🔊</button>
+                <input type="range" id="volume" class="w-20" min="0" max="100" value="50">
+            </div>
         </div>
     </div>
+
+    <!-- Iframe para reproducción de Spotify -->
+    <iframe id="player-iframe" src="/player" width="0" height="0" frameborder="0" allowtransparency="true" allow="encrypted-media"></iframe>
 </section>
+
+<script>
+let trackQueue = [];
+let currentIndex = 0;
+
+function showNotification(message, type = 'info') {
+    const header = document.querySelector('header');
+    const headerHeight = header ? header.offsetHeight : 0;
+    const notification = document.createElement('div');
+    notification.className = `fixed right-4 p-4 rounded-lg shadow-lg text-white z-60`;
+    notification.textContent = message;
+    const styles = {
+        success: 'bg-green-500',
+        error: 'bg-red-500',
+        info: 'bg-blue-500',
+        warning: 'bg-yellow-500'
+    };
+    notification.classList.add(styles[type] || styles.info);
+    document.body.appendChild(notification);
+    notification.style.top = `${headerHeight + 16}px`;
+    anime({
+        targets: notification,
+        translateX: [300, 0],
+        opacity: [0, 1],
+        easing: 'easeOutQuad',
+        duration: 400,
+        complete: () => {
+            setTimeout(() => {
+                anime({
+                    targets: notification,
+                    translateX: 300,
+                    opacity: 0,
+                    easing: 'easeInQuad',
+                    duration: 400,
+                    complete: () => notification.remove()
+                });
+            }, 3000);
+        }
+    });
+}
+
+async function playTrack(uri, title, artist, image_url) {
+    const playerIframe = document.getElementById('player-iframe');
+    if (uri.startsWith('http')) { // URLs de Supabase
+        playerIframe.contentWindow.postMessage({
+            type: 'playAudioFile',
+            url: uri,
+            title,
+            artist,
+            image_url: image_url || 'https://picsum.photos/50/50?random=1'
+        }, '*');
+    } else { // URIs de Spotify
+        trackQueue = [{ uri, title, artist, image_url }];
+        currentIndex = 0;
+        playerIframe.contentWindow.postMessage({
+            type: 'playTrack',
+            uri,
+            title,
+            artist,
+            image_url
+        }, '*');
+    }
+    await logListeningHistory(uri, title, artist);
+    updateTrackInfo({ uri, title, artist, image_url });
+}
+
+async function playPlaylist(songs) {
+    const playerIframe = document.getElementById('player-iframe');
+    trackQueue = songs;
+    currentIndex = 0;
+    playerIframe.contentWindow.postMessage({
+        type: 'playPlaylist',
+        songs
+    }, '*');
+    for (const song of songs) {
+        await logListeningHistory(song.uri, song.title, song.artist);
+    }
+    updateTrackInfo(songs[0]);
+}
+
+async function logListeningHistory(uri, title, artist) {
+    try {
+        const response = await fetch('/log_listening', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                song_uri: uri,
+                song_title: title,
+                song_artist: artist
+            })
+        });
+        if (!response.ok) {
+            showNotification('Error al registrar la canción en el historial', 'error');
+        }
+    } catch (error) {
+        console.error('Error al registrar la canción:', error);
+        showNotification('Error al registrar la canción en el historial', 'error');
+    }
+}
+
+function updateTrackInfo(track) {
+    if (!track) return;
+    const titleElement = document.getElementById('player-title');
+    const artistElement = document.getElementById('player-artist');
+    const albumElement = document.getElementById('player-album');
+
+    anime({
+        targets: [titleElement, artistElement, albumElement],
+        opacity: [1, 0],
+        duration: 200,
+        easing: 'easeInQuad',
+        complete: () => {
+            titleElement.textContent = track.title || 'Selecciona una canción';
+            artistElement.textContent = track.artist || 'Artista';
+            albumElement.src = track.image_url || 'https://picsum.photos/50/50?random=1';
+            anime({
+                targets: [titleElement, artistElement, albumElement],
+                opacity: [0, 1],
+                duration: 200,
+                easing: 'easeOutQuad'
+            });
+        }
+    });
+}
+
+document.addEventListener('DOMContentLoaded', () => {
+    const playerIframe = document.getElementById('player-iframe');
+
+    // Manejo de mensajes desde el reproductor
+    window.addEventListener('message', (event) => {
+        if (event.data.type === 'notification') {
+            showNotification(event.data.message, event.data.notificationType);
+        } else if (event.data.type === 'playerState') {
+            const { isPlaying, track, position, duration } = event.data;
+            document.getElementById('play-pause').textContent = isPlaying ? '⏸️' : '⏯️';
+            document.getElementById('progress-bar').value = position;
+            document.getElementById('progress-bar').max = duration;
+            document.getElementById('current-time').textContent = formatTime(position / 1000);
+            document.getElementById('duration').textContent = formatTime(duration / 1000);
+            if (track) {
+                updateTrackInfo(track);
+            }
+        } else if (event.data.type === 'updateQueue') {
+            trackQueue = event.data.queue;
+            currentIndex = event.data.currentIndex;
+        }
+    });
+
+    // Controles del reproductor
+    document.getElementById('play-pause').addEventListener('click', () => {
+        playerIframe.contentWindow.postMessage({ type: 'playPause' }, '*');
+    });
+
+    document.getElementById('prev-track').addEventListener('click', () => {
+        playerIframe.contentWindow.postMessage({ type: 'previous' }, '*');
+    });
+
+    document.getElementById('next-track').addEventListener('click', () => {
+        playerIframe.contentWindow.postMessage({ type: 'next' }, '*');
+    });
+
+    document.getElementById('shuffle').addEventListener('click', () => {
+        playerIframe.contentWindow.postMessage({ type: 'toggleShuffle' }, '*');
+    });
+
+    document.getElementById('loop').addEventListener('click', () => {
+        playerIframe.contentWindow.postMessage({ type: 'toggleRepeat' }, '*');
+    });
+
+    document.getElementById('mute').addEventListener('click', () => {
+        playerIframe.contentWindow.postMessage({ type: 'toggleMute' }, '*');
+    });
+
+    document.getElementById('volume').addEventListener('input', (e) => {
+        const volume = e.target.value / 100;
+        playerIframe.contentWindow.postMessage({ type: 'setVolume', volume }, '*');
+    });
+
+    document.getElementById('progress-bar').addEventListener('input', (e) => {
+        const positionMs = parseInt(e.target.value);
+        playerIframe.contentWindow.postMessage({ type: 'seek', positionMs }, '*');
+    });
+
+    // Botones de reproducción
+    document.querySelectorAll('.play-button').forEach(button => {
+        button.addEventListener('click', () => {
+            const uri = button.getAttribute('data-uri');
+            const title = button.getAttribute('data-title');
+            const artist = button.getAttribute('data-artist');
+            const image_url = button.getAttribute('data-image-url') || 'https://picsum.photos/50/50?random=1';
+            playTrack(uri, title, artist, image_url);
+        });
+    });
+
+    document.querySelectorAll('.play-playlist').forEach(button => {
+        button.addEventListener('click', () => {
+            const playlistId = button.getAttribute('data-playlist-id');
+            const songsList = document.querySelector(`.songs-list[data-playlist-id="${playlistId}"]`);
+            const songs = Array.from(songsList.querySelectorAll('.play-button')).map(btn => ({
+                uri: btn.getAttribute('data-uri'),
+                title: btn.getAttribute('data-title'),
+                artist: btn.getAttribute('data-artist'),
+                image_url: btn.getAttribute('data-image-url') || 'https://picsum.photos/50/50?random=1'
+            }));
+            if (songs.length > 0) {
+                playPlaylist(songs);
+            } else {
+                showNotification('La playlist está vacía', 'error');
+            }
+        });
+    });
+
+    // Refrescar recomendaciones
+    document.getElementById('refresh-recommendations')?.addEventListener('click', async () => {
+        try {
+            const response = await fetch('/refresh_recommendations');
+            if (response.status === 401) {
+                showNotification('Por favor, inicia sesión para refrescar las recomendaciones', 'error');
+                return;
+            }
+            const songs = await response.json();
+            const slider = document.getElementById('recommended-slider');
+            slider.innerHTML = songs.map(song => `
+                <div class="min-w-[200px] mx-2 rounded">
+                    <div class="relative">
+                        <img src="${song.image_url || 'https://picsum.photos/200/200?random=' + Math.random()}" alt="${song.title}" class="w-full h-48 object-cover rounded-md mb-4">
+                        <button class="play-button absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 text-white text-4xl opacity-50 hover:opacity-100 transition-opacity" data-uri="${song.uri}" data-title="${song.title}" data-artist="${song.artist}">►</button>
+                    </div>
+                    <h3 class="text-lg font-semibold truncate">${song.title}</h3>
+                    <p class="text-gray-600 dark:text-gray-300 truncate">${song.artist}</p>
+                    <form class="add-to-playlist-form mt-2 flex items-center gap-2" method="POST" action="/add_to_playlist">
+                        <input type="hidden" name="csrf_token" value="${document.querySelector('input[name=csrf_token]').value}">
+                        <input type="hidden" name="song_uri" value="${song.uri}">
+                        <input type="hidden" name="song_title" value="${song.title}">
+                        <input type="hidden" name="song_artist" value="${song.artist}">
+                        <select name="playlist_id" class="p-1 text-sm border rounded dark:bg-gray-700 dark:border-gray-600 dark:text-white">
+                            <option value="">Seleccionar Playlist</option>
+                            ${document.querySelectorAll('#new-releases-slider select option').length > 1 ?
+                                Array.from(document.querySelectorAll('#new-releases-slider select option'))
+                                    .map(opt => `<option value="${opt.value}">${opt.text}</option>`).join('') :
+                                ''}
+                        </select>
+                        <button type="submit" class="bg-blue-500 text-white py-1 px-2 text-sm rounded hover:bg-blue-600 transition">Agregar</button>
+                    </form>
+                </div>
+            `).join('');
+
+            slider.querySelectorAll('.play-button').forEach(button => {
+                button.addEventListener('click', () => {
+                    const uri = button.getAttribute('data-uri');
+                    const title = button.getAttribute('data-title');
+                    const artist = button.getAttribute('data-artist');
+                    const image_url = button.getAttribute('data-image-url') || 'https://picsum.photos/50/50?random=1';
+                    playTrack(uri, title, artist, image_url);
+                });
+            });
+
+            slider.querySelectorAll('.add-to-playlist-form').forEach(form => {
+                form.addEventListener('submit', async (e) => {
+                    e.preventDefault();
+                    const formData = new FormData(form);
+                    try {
+                        const response = await fetch('/add_to_playlist', {
+                            method: 'POST',
+                            body: formData,
+                        });
+                        const result = await response.json();
+                        if (response.ok) {
+                            showNotification('Canción agregada a la playlist', 'success');
+                        } else {
+                            showNotification(result.error || 'Error al agregar la canción', 'error');
+                        }
+                    } catch (error) {
+                        console.error('Error al agregar canción:', error);
+                        showNotification('Error al agregar la canción', 'error');
+                    }
+                });
+            });
+        } catch (error) {
+            console.error('Error refrescando recomendaciones:', error);
+            showNotification('Error al refrescar recomendaciones', 'error');
+        }
+    });
+
+    // Eliminar canciones de la playlist del administrador
+    document.querySelectorAll('.remove-song').forEach(button => {
+        button.addEventListener('click', async () => {
+            const songUri = button.dataset.uri;
+            const songElement = button.closest('.min-w-\\\[200px\\\]');
+            try {
+                const response = await fetch('/admin_manage_playlist', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+                    body: `action=remove&song_uri=${encodeURIComponent(songUri)}`
+                });
+                const result = await response.json();
+                if (response.ok) {
+                    songElement.style.transition = 'opacity 0.5s';
+                    songElement.style.opacity = '0';
+                    setTimeout(() => {
+                        songElement.remove();
+                    }, 500);
+                    showNotification(result.message, 'success');
+                } else {
+                    showNotification(result.error || 'Error al eliminar la canción', 'error');
+                }
+            } catch (error) {
+                console.error('Error eliminando canción:', error);
+                showNotification('Error al eliminar la canción', 'error');
+            }
+        });
+    });
+
+    // Comando de voz
+    document.getElementById('voice-command-btn')?.addEventListener('click', () => {
+    const mediaRecorder = new MediaRecorder(navigator.mediaDevices.getUserMedia({ audio: true }).then(stream => stream));
+    let audioChunks = [];
+    mediaRecorder.ondataavailable = e => audioChunks.push(e.data);
+    mediaRecorder.onstop = async () => {
+        const audioBlob = new Blob(audioChunks, { type: 'audio/wav' });
+        const formData = new FormData();
+        formData.append('audio', audioBlob, 'command.wav');
+        try {
+            const response = await fetch('/voice-command', {
+                method: 'POST',
+                body: formData
+            });
+            const data = await response.json();
+            if (data.success) {
+                showNotification(data.message, 'success');
+                if (data.redirect) {
+                    window.location.href = data.redirect;
+                }
+            } else {
+                showNotification(data.error || 'Comando no reconocido', 'error');
+            }
+        } catch (error) {
+            console.error('Error al procesar comando de voz:', error);
+            showNotification('Error al procesar el comando de voz', 'error');
+        }
+    };
+    mediaRecorder.start();
+    setTimeout(() => mediaRecorder.stop(), 3000); // Graba por 3 segundos
+});
+
+    // Formato de tiempo
+    function formatTime(seconds) {
+        const minutes = Math.floor(seconds / 60);
+        const secs = Math.floor(seconds % 60);
+        return `${minutes.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
+    }
+
+    // Toggle de canciones en playlists
+    document.querySelectorAll('.toggle-songs').forEach(button => {
+        button.addEventListener('click', () => {
+            const extraSongs = button.previousElementSibling;
+            extraSongs.classList.toggle('hidden');
+            button.textContent = extraSongs.classList.contains('hidden') ? 'Ver Más' : 'Ver Menos';
+            anime({
+                targets: extraSongs,
+                opacity: extraSongs.classList.contains('hidden') ? [1, 0] : [0, 1],
+                height: extraSongs.classList.contains('hidden') ? ['auto', 0] : [0, 'auto'],
+                duration: 300,
+                easing: 'easeOutQuad'
+            });
+        });
+    });
+
+    // Cargar más historial
+    document.getElementById('load-more-history')?.addEventListener('click', async () => {
+        const offset = document.querySelectorAll('#listening-history > div').length;
+        try {
+            const response = await fetch(`/load_more_history?offset=${offset}`);
+            const history = await response.json();
+            const historyContainer = document.getElementById('listening-history');
+            history.forEach(entry => {
+                const entryDiv = document.createElement('div');
+                entryDiv.className = 'bg-white dark:bg-gray-800 p-4 rounded-lg shadow flex items-center justify-between';
+                entryDiv.innerHTML = `
+                    <div>
+                        <p class="text-lg font-medium">${entry.song_title} - ${entry.song_artist}</p>
+                        <p class="text-gray-600 dark:text-gray-300">Escuchada el: ${new Date(entry.listened_at).toLocaleString()}</p>
+                    </div>
+                    <button class="play-button bg-green-500 text-white py-1 px-2 rounded hover:bg-green-600 transition" data-uri="${entry.song_uri}" data-title="${entry.song_title}" data-artist="${entry.song_artist}">Reproducir</button>
+                `;
+                historyContainer.appendChild(entryDiv);
+                entryDiv.querySelector('.play-button').addEventListener('click', () => {
+                    playTrack(entry.song_uri, entry.song_title, entry.song_artist, 'https://picsum.photos/50/50?random=1');
+                });
+                anime({
+                    targets: entryDiv,
+                    translateY: [20, 0],
+                    opacity: [0, 1],
+                    duration: 300,
+                    easing: 'easeOutQuad'
+                });
+            });
+            if (history.length < 3) {
+                document.getElementById('load-more-history').remove();
+            }
+        } catch (error) {
+            console.error('Error cargando más historial:', error);
+            showNotification('Error al cargar más historial', 'error');
+        }
+    });
+// Carrusel de Canciones de Artistas
+const artistSlider = document.getElementById('artist-songs-slider');
+const artistLeftBtn = document.getElementById('artist-songs-left-btn');
+const artistRightBtn = document.getElementById('artist-songs-right-btn');
+let artistIndex = 0;
+
+if (artistSlider && artistLeftBtn && artistRightBtn) {
+    const artistItems = artistSlider.children.length;
+    const artistItemWidth = 200 + 16; // 200px ancho + 16px márgenes
+
+    artistLeftBtn.addEventListener('click', () => {
+        if (artistIndex > 0) {
+            artistIndex--;
+            artistSlider.style.transform = `translateX(-${artistIndex * artistItemWidth}px)`;
+        }
+    });
+
+    artistRightBtn.addEventListener('click', () => {
+        if (artistIndex < artistItems - 1) {
+            artistIndex++;
+            artistSlider.style.transform = `translateX(-${artistIndex * artistItemWidth}px)`;
+        }
+    });
+}
+});
+</script>
 {% endblock %}

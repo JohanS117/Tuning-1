@@ -1,0 +1,27 @@
+{% extends 'base.html' %}
+{% block title %}Resultados de búsqueda - Tuning{% endblock %}
+{% block content %}
+<div class="max-w-4xl mx-auto">
+    <h1 class="text-xl text-3xl font-bold mb-6">Resultados para: {{ query }}</h1>
+    <div class="space-y-4">
+        {% if results %}
+            {% for track in results %}
+                <div class="bg-white dark:bg-gray-800 p-4 rounded-lg shadow flex items-center space-x-4">
+                    <img src="{{ track.image_url'] }}" alt="{{ track.title }}" class="w-16 h-16 rounded">
+                    <div>
+                        <h3 class="text-lg font-semibold">{{ track.title }}</h3>
+                        <p class="text-gray-600 dark:text-gray-400">{{ track.artist }}</p>
+                        <audio controls class="mt-2 w-full">
+                            <source src="{{ track.uri }}" type="audio/mpeg">
+                            Tu navegador no soporta el elemento de audio.
+                        </audio>
+                    </div>
+                </div>
+            {% endfor %}
+        {% else %}
+            <p class="text-gray-600 dark:text-gray-400">No se encontraron resultados.</p>
+        {% endif %}
+    </div>
+    <a href="{{ url_for('dashboard') }}" class="mt-6 inline-block bg-blue-600 text-white py-2 px-4 rounded hover:bg-blue-700">Volver</a>
+</div>
+{% endblock %}

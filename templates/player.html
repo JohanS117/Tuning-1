@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Reproductor - Tuning (Admin)</title>
+    <script src="https://sdk.scdn.co/spotify-player.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/animejs/3.2.1/anime.min.js"></script>
+    <script src="/static/js/player.js"></script>
+    <script>
+        window.spotifyToken = "{{ spotify_token | safe }}";
+    </script>
+    <meta name="user-id" content="{{ session.user_id | safe }}">
+    <script>
+    let audio = new Audio();
+    let isPlaying = false;
+
+    window.addEventListener('message', (e) => {
+        if (e.data.type === 'playAudioFile') {
+            audio.src = e.data.url;
+            audio.play();
+            isPlaying = true;
+            updatePlayer(e.data);
+        } else if (e.data.type === 'playTrack') {
+            // Manejo de Spotify (mantén tu lógica actual)
+        } else if (e.data.type === 'playPause') {
+            if (isPlaying) {
+                audio.pause();
+                isPlaying = false;
+            } else {
+                audio.play();
+                isPlaying = true;
+            }
+        }
+    });
+
+    function updatePlayer(data) {
+        document.getElementById('player-title').textContent = data.title;
+        document.getElementById('player-artist').textContent = data.artist;
+        document.getElementById('player-album').src = data.image_url;
+    }
+</script>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #1f2937;
+            color: #fff;
+        }
+        #player-container {
+            padding: 20px;
+            max-width: 400px;
+            margin: 0 auto;
+            background-color: #374151;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+        }
+        #player-album {
+            width: 100%;
+            height: 200px;
+            object-fit: cover;
+            border-radius: 8px;
+            margin-bottom: 10px;
+        }
+        #player-title, #player-artist {
+            text-align: center;
+            margin: 5px 0;
+        }
+        #progress-bar {
+            width: 100%;
+            margin: 10px 0;
+        }
+        #controls {
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+        button {
+            padding: 8px 16px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            background-color: #3b82f6;
+            color: white;
+        }
+        button:hover {
+            background-color: #2563eb;
+        }
+        #mute {
+            background-color: #6b7280;
+        }
+        #mute:hover {
+            background-color: #4b5563;
+        }
+        #volume {
+            width: 100px;
+        }
+        #current-time, #duration {
+            font-size: 12px;
+            color: #9ca3af;
+        }
+        .time-container {
+            display: flex;
+            justify-content: space-between;
+        }
+        #playlist-display {
+            margin-top: 10px;
+        }
+        #playlist-toggle {
+            background-color: #10b981;
+        }
+        #playlist-toggle:hover {
+            background-color: #059669;
+        }
+        #shuffle-btn.active, #repeat-btn.active {
+            background-color: #10b981;
+        }
+        #playlist-list {
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.3s ease;
+        }
+        #playlist-list.show {
+            max-height: 200px;
+            overflow-y: auto;
+        }
+        #playlist-list li {
+            padding: 8px;
+            border-bottom: 1px solid #4b5563;
+        }
+        #playlist-list li:hover {
+            background-color: #4b5563;
+        }
+        #playlist-list li.active {
+            background-color: #1e40af;
+        }
+    </style>
+</head>
+<body>
+    <div id="player-container">
+        <img id="player-album" src="https://picsum.photos/200/200?random=1" alt="Álbum">
+        <h3 id="player-title">Selecciona una canción</h3>
+        <p id="player-artist">Artista</p>
+        <div class="time-container">
+            <span id="current-time">00:00</span>
+            <span id="duration">00:00</span>
+        </div>
+        <input type="range" id="progress-bar" min="0" max="1000" value="0">
+        <div id="controls">
+            <button id="shuffle-btn">🔀</button>
+            <button id="prev-track">⏮️</button>
+            <button id="play-pause">⏯️</button>
+            <button id="next-track">⏭️</button>
+            <button id="repeat-btn">🔁</button>
+            <button id="mute">🔊</button>
+            <input type="range" id="volume" min="0" max="100" value="50">
+            <button id="playlist-toggle">📜</button>
+            <button id="voice-command-btn" class="bg-blue-500 text-white py-1 px-2 rounded hover:bg-blue-600 transition">🎙️</button>
+        </div>
+        <div id="playlist-display">
+            <h4 class="text-lg font-semibold">Playlist Actual</h4>
+            <ul id="playlist-list" class="space-y-2"></ul>
+        </div>
+    </div>
+</body>
+</html>

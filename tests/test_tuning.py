@@ -11,13 +11,11 @@ import os
 from dotenv import load_dotenv
 from werkzeug.security import generate_password_hash
 import uuid
-
 # Cargar variables de entorno
 load_dotenv()
 SUPABASE_URL = os.getenv("SUPABASE_URL")
 SUPABASE_KEY = os.getenv("SUPABASE_KEY")
 supabase: Client = create_client(SUPABASE_URL, SUPABASE_KEY)
-
 # Configurar el proxy de OWASP ZAP
 chrome_options = Options()
 chrome_options.add_argument('--proxy-server=http://localhost:8080')

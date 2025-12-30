@@ -1,0 +1,80 @@
+{% extends 'base.html' %}
+{% block title %}Tuning - Estadísticas{% endblock %}
+{% block content %}
+<div id="section-content">
+    <h1 class="text-3xl font-bold mb-6">Estadísticas</h1>
+    <div class="p-6 rounded-lg shadow song-card">
+        <h2 class="text-2xl font-semibold mb-4">Estadísticas Generales</h2>
+        <div class="mb-4">
+            <label for="time-range" class="text-gray-600 dark:text-gray-300 mr-2">Rango temporal:</label>
+            <select id="time-range" class="p-2 border rounded dark:bg-gray-700 dark:border-gray-600 dark:text-white light:bg-white light:border-gray-300 light:text-black">
+                <option value="all">Todo el tiempo</option>
+                <option value="week">Última semana</option>
+                <option value="month">Último mes</option>
+            </select>
+        </div>
+        <canvas id="stats-chart" class="w-full h-64"></canvas>
+        <div class="mt-4">
+            <p class="text-gray-600 dark:text-gray-300">Total de Usuarios: <span id="total-users">{{ statistics.total_users }}</span></p>
+            <p class="text-gray-600 dark:text-gray-300">Total de Canciones Reproducidas: <span id="total-songs-played">{{ statistics.total_songs_played }}</span></p>
+            <p class="text-gray-600 dark:text-gray-300">Total de Comentarios: <span id="total-comments">{{ statistics.total_comments }}</span></p>
+        </div>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+<script>
+    const ctx = document.getElementById('stats-chart').getContext('2d');
+    const statsChart = new Chart(ctx, {
+        type: 'bar',
+        data: {
+            labels: ['Usuarios', 'Canciones Reproducidas', 'Comentarios'],
+            datasets: [{
+                label: 'Estadísticas',
+                data: [{{ statistics.total_users }}, {{ statistics.total_songs_played }}, {{ statistics.total_comments }}],
+                backgroundColor: ['#3b82f6', '#10b981', '#f59e0b'],
+                borderColor: ['#2563eb', '#059669', '#d97706'],
+                borderWidth: 1
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            scales: {
+                y: {
+                    beginAtZero: true,
+                    title: {
+                        display: true,
+                        text: 'Cantidad'
+                    }
+                }
+            },
+            plugins: {
+                legend: {
+                    display: false
+                },
+                title: {
+                    display: true,
+                    text: 'Estadísticas Generales'
+                }
+            }
+        }
+    });
+
+    const timeRangeSelect = document.getElementById('time-range');
+    timeRangeSelect.addEventListener('change', async () => {
+        const range = timeRangeSelect.value;
+        try {
+            const response = await fetch(`/admin/statistics?range=${range}`);
+            const stats = await response.json();
+            statsChart.data.datasets[0].data = [stats.total_users, stats.total_songs_played, stats.total_comments];
+            statsChart.update();
+            document.getElementById('total-users').textContent = stats.total_users;
+            document.getElementById('total-songs-played').textContent = stats.total_songs_played;
+            document.getElementById('total-comments').textContent = stats.total_comments;
+        } catch (error) {
+            console.error('Error al actualizar estadísticas:', error);
+        }
+    });
+</script>
+{% endblock %}

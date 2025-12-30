@@ -1,0 +1,24 @@
+127.0.0.1 - - [29/May/2025 20:30:59] "GET /check_role HTTP/1.1" 200 -
+127.0.0.1 - - [29/May/2025 20:30:59] "GET /check_role HTTP/1.1" 200 -
+127.0.0.1 - - [29/May/2025 20:31:22] "[36mGET /static/css/base.css HTTP/1.1[0m" 304 -
+127.0.0.1 - - [29/May/2025 20:31:22] "GET /.well-known/appspecific/com.chrome.devtools.json HTTP/1.1" 200 -
+127.0.0.1 - - [29/May/2025 20:31:22] "[36mGET /static/css/base.css HTTP/1.1[0m" 304 -
+The CSRF token is missing.
+127.0.0.1 - - [29/May/2025 20:32:32] "[31m[1mPOST /log_listening HTTP/1.1[0m" 400 -
+HTTP Request: POST https://jqujootzhyuhtuaqbkjv.supabase.co/rest/v1/listening_history "HTTP/2 201 Created"
+HTTP Request: POST https://jqujootzhyuhtuaqbkjv.supabase.co/rest/v1/listening_history "HTTP/2 201 Created"
+HTTP Request: POST https://jqujootzhyuhtuaqbkjv.supabase.co/rest/v1/listening_history "HTTP/2 201 Created"
+127.0.0.1 - - [29/May/2025 20:32:33] "POST /log_listening HTTP/1.1" 200 -
+127.0.0.1 - - [29/May/2025 20:32:33] "POST /log_listening HTTP/1.1" 200 -
+127.0.0.1 - - [29/May/2025 20:32:33] "POST /log_listening HTTP/1.1" 200 -
+127.0.0.1 - - [29/May/2025 20:32:37] "[33mGET /static/favicon.ico HTTP/1.1[0m" 404 -
+127.0.0.1 - - [29/May/2025 20:39:19] "GET /search_songs?query= HTTP/1.1" 200 -
+127.0.0.1 - - [29/May/2025 20:39:20] "GET /search_songs?query= HTTP/1.1" 200 -
+127.0.0.1 - - [29/May/2025 20:39:21] "GET /search_songs?query= HTTP/1.1" 200 -
+HTTP Request: POST https://jqujootzhyuhtuaqbkjv.supabase.co/rest/v1/listening_history "HTTP/2 201 Created"
+127.0.0.1 - - [29/May/2025 20:39:33] "POST /log_listening HTTP/1.1" 200 -
+127.0.0.1 - - [29/May/2025 20:52:27] "GET /search_songs?query= HTTP/1.1" 200 -
+127.0.0.1 - - [29/May/2025 20:52:28] "GET /search_songs?query= HTTP/1.1" 200 -
+127.0.0.1 - - [29/May/2025 20:52:29] "GET /search_songs?query= HTTP/1.1" 200 -
+HTTP Request: POST https://jqujootzhyuhtuaqbkjv.supabase.co/rest/v1/listening_history "HTTP/2 201 Created"
+127.0.0.1 - - [29/May/2025 21:01:31] "POST /log_listening HTTP/1.1" 200 -

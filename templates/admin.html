@@ -1,0 +1,673 @@
+{% extends 'base.html' %}
+{% block title %}Tuning - Admin Panel{% endblock %}
+{% block content %}
+<!-- Iframe del reproductor -->
+<iframe id="player-iframe" src="/player" style="position: fixed; bottom: 0; left: 0; width: 100%; height: 300px; z-index: 1000; transform: translateY(100%);"></iframe>
+<button id="player-toggle" style="position: fixed; bottom: 130px; right: 10px; background-color: #ffd700; color: #1f2937; padding: 8px 12px; border-radius: 50%; cursor: pointer; z-index: 1001; box-shadow: 0 2px 5px rgba(0, 0, 0, 0.3); font-size: 16px;">🎵</button>
+<style>
+    /* Asegurar que el tema oscuro cubra todo el body */
+    body.dark-theme {
+        background-color: #1a1a1a !important;
+        color: #e0e0e0 !important;
+    }
+    body.light-theme {
+        background-color: #f0f0f0 !important;
+        color: #333 !important;
+    }
+
+    /* Gradiente del Header (ajustado) */
+    header {
+        background: linear-gradient(90deg, #ff6f61, #de64a2, #6b5b95, #88b04b);
+        background-size: 400% 400%;
+        animation: gradient 15s ease infinite;
+        padding: 10px;
+        text-align: center;
+        font-family: "Bungee Spice", sans-serif;
+        font-weight: 400;
+        font-style: normal;
+        font-size: 24px;
+        color: white;
+        text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
+    }
+    @keyframes gradient {
+        0% { background-position: 0% 50%; }
+        50% { background-position: 100% 50%; }
+        100% { background-position: 0% 50%; }
+    }
+
+    /* Sidebar Retráctil */
+    .sidebar {
+        position: fixed;
+        top: 0;
+        left: 0;
+        height: 100%;
+        width: 50px;
+        background-color: #343a40;
+        transition: width 0.3s ease;
+        z-index: 1000;
+    }
+    .sidebar:hover {
+        width: 250px;
+    }
+    .sidebar-content {
+        display: none;
+        padding: 1rem;
+    }
+    .sidebar:hover .sidebar-content {
+        display: block;
+    }
+    .dark-theme .sidebar {
+        background-color: #1f2937;
+    }
+    .light-theme .sidebar {
+        background-color: #4b5563;
+    }
+
+    /* Estilo del Interruptor de Tema (Toggle Switch) */
+    .theme-switch-wrapper {
+        display: flex;
+        align-items: center;
+    }
+    .theme-switch-wrapper label {
+        margin-left: 8px;
+        color: white;
+        font-size: 14px;
+    }
+    #theme-switch {
+        display: none;
+    }
+    .theme-switch-label {
+        position: relative;
+        display: inline-block;
+        width: 40px;
+        height: 20px;
+        background-color: #ccc;
+        border-radius: 20px;
+        cursor: pointer;
+        transition: background-color 0.3s;
+    }
+    .theme-switch-label::after {
+        content: '';
+        position: absolute;
+        width: 16px;
+        height: 16px;
+        background-color: white;
+        border-radius: 50%;
+        top: 2px;
+        left: 2px;
+        transition: transform 0.3s;
+    }
+    #theme-switch:checked + .theme-switch-label {
+        background-color: #48bb78;
+    }
+    #theme-switch:checked + .theme-switch-label::after {
+        transform: translateX(20px);
+    }
+
+    /* Temas Claro/Oscuro */
+    .dark-theme {
+        background-color: #1a1a1a;
+        color: #e0e0e0;
+    }
+    .light-theme {
+        background-color: #f0f0f0;
+        color: #333;
+    }
+    .dark-theme main {
+        background-color: #1a1a1a;
+    }
+    .light-theme main {
+        background-color: #f0f0f0;
+    }
+    /* Ajuste del título para el tema oscuro */
+    .dark-theme h1 {
+        color: #ffffff !important;
+    }
+    .light-theme h1 {
+        color: #333 !important;
+    }
+
+    /* Ajuste de Tarjetas para el Tema Oscuro */
+    .song-card {
+        background-color: #ffffff;
+        transition: transform 0.3s ease, box-shadow 0.3s ease;
+    }
+    .dark-theme .song-card {
+        background-color: #2d3748;
+    }
+    .dark-theme .song-card h2,
+    .dark-theme .song-card p {
+        color: #e0e0e0;
+    }
+    .light-theme .song-card {
+        background-color: #ffffff;
+        box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+    }
+    .song-card:hover {
+        transform: scale(1.05);
+        box-shadow: 0 8px 16px rgba(0, 0, 0, 0.3);
+    }
+
+    /* Estilo del Buscador y Resultados (para secciones donde aplica) */
+    #admin-search-input {
+        background-color: #ffffff;
+        color: #333;
+        border: 1px solid #ccc;
+        transition: background-color 0.3s ease, color 0.3s ease, border-color 0.3s ease;
+    }
+    .dark-theme #admin-search-input {
+        background-color: #2d3748;
+        color: #e0e0e0;
+        border: 1px solid #4a5568;
+    }
+
+    /* Ajuste de Tarjetas de Resultados de Búsqueda */
+    #admin-search-results .bg-gray-700 {
+        background-color: #ffffff;
+        transition: background-color 0.3s ease;
+    }
+    .dark-theme #admin-search-results .bg-gray-700 {
+        background-color: #2d3748;
+    }
+    #admin-search-results p {
+        color: #666;
+        transition: color 0.3s ease;
+    }
+    .dark-theme #admin-search-results p {
+        color: #e0e0e0;
+    }
+
+    /* Estilo del Botón de Cerrar Sesión */
+    .logout-btn {
+        background: linear-gradient(90deg, #ff4d4d, #ff6666);
+        padding: 6px 12px;
+        border-radius: 20px;
+        font-size: 14px;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+        box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+        transition: all 0.3s ease;
+    }
+    .logout-btn:hover {
+        background: linear-gradient(90deg, #ff6666, #ff4d4d);
+        box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
+        transform: translateY(-2px);
+    }
+
+    /* Estilo del Iframe del Reproductor */
+    #player-iframe {
+        transition: transform 0.3s ease, background-color 0.3s ease;
+    }
+    .dark-theme #player-iframe {
+        background-color: #1f2937;
+    }
+    .light-theme #player-iframe {
+        background-color: #e5e7eb;
+    }
+</style>
+
+<main class="min-h-screen grid grid-cols-1 lg:grid-cols-4 gap-6 pt-24 pb-16">
+    <!-- Sidebar Retráctil -->
+    <aside class="sidebar">
+        <div class="sidebar-content">
+            <h3 class="text-xl font-semibold mb-4 text-white">Menú</h3>
+            <ul class="space-y-2">
+                <li><a href="/admin" data-section="overview" class="text-white hover:text-blue-300 flex items-center sidebar-link"><span class="mr-2">👁️</span> Descripción General</a></li>
+                <li><a href="/admin/users" data-section="users" class="text-white hover:text-blue-300 flex items-center sidebar-link"><span class="mr-2">👥</span> Listar Usuarios</a></li>
+                <li><a href="/admin/trends" data-section="trends" class="text-white hover:text-blue-300 flex items-center sidebar-link"><span class="mr-2">📈</span> Tendencias</a></li>
+                <li><a href="/admin/geotend" data-section="geotend" class="text-white hover:text-blue-300 flex items-center sidebar-link"><span class="mr-2">🌍</span> GeoTendencias</a></li>
+                <li><a href="/admin/statistics" data-section="statistics" class="text-white hover:text-blue-300 flex items-center sidebar-link"><span class="mr-2">📊</span> Estadísticas</a></li>
+                <li><a href="/admin_manage_playlist" data-section="manage-playlist" class="text-white hover:text-blue-300 flex items-center sidebar-link"><span class="mr-2">🎵</span> Gestionar Playlist</a></li>
+                <li><a href="/admin/news" data-section="news" class="text-white hover:text-blue-300 flex items-center sidebar-link"><span class="mr-2">📰</span> Noticias</a></li>
+                <li>
+                    <div class="theme-switch-wrapper mt-4">
+                        <input type="checkbox" id="theme-switch">
+                        <label for="theme-switch" class="theme-switch-label"></label>
+                        <label for="theme-switch">Claro/Oscuro</label>
+                    </div>
+                </li>
+                <li><a href="/logout" class="logout-btn text-white flex items-center"><span class="mr-2">🚪</span> Cerrar Sesión</a></li>
+            </ul>
+        </div>
+    </aside>
+
+    <!-- Contenido Principal -->
+    <section class="lg:col-span-3 p-6">
+        <div id="content" style="opacity: 1; transform: translateY(0px);">
+            <div id="section-content">
+                <h1 class="text-3xl font-bold mb-6">Descripción General</h1>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div class="p-6 rounded-lg shadow song-card" style="transform: translateY(0px) scale(1); opacity: 1; box-shadow: rgba(0, 0, 0, 0.1) 0px 2px 5px;">
+                        <h2 class="text-2xl font-semibold mb-4">Usuarios Recientes</h2>
+                        <p class="text-gray-600 dark:text-gray-300">Andrea Cervantes</p>
+                        <p class="text-gray-600 dark:text-gray-300">Admin·Jhohans</p>
+                        <p class="text-gray-600 dark:text-gray-300">Santiago Hernandez</p>
+                    </div>
+                    <div class="p-6 rounded-lg shadow song-card" style="transform: translateY(0px) scale(1); opacity: 1; box-shadow: rgba(0, 0, 0, 0.098) 0px 2px 5px;">
+                        <h2 class="text-2xl font-semibold mb-4">Comentarios Recientes</h2>
+                        <div class="mb-4">
+                            <p class="text-gray-600 dark:text-gray-300"><strong>Admin·Jhohans:</strong> hii esta super</p>
+                            <p class="text-gray-500 dark:text-gray-400 text-sm">2025-04-21 07:39:31</p>
+                        </div>
+                        <div class="mb-4">
+                            <p class="text-gray-600 dark:text-gray-300"><strong>Andrea Cervantes:</strong> Al complementar algunos ajustes ya se ven algunos cambios 😁</p>
+                            <p class="text-gray-500 dark:text-gray-400 text-sm">2025-04-21 07:38:57</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+</main>
+
+<script src="https://cdn.jsdelivr.net/npm/animejs@3.2.1/lib/anime.min.js"></script>
+<script src="https://sdk.scdn.co/spotify-player.js"></script>
+<script>
+    // Animación del Título
+    const title = document.querySelector('h1');
+    if (title) {
+        anime({
+            targets: title,
+            scale: [0.9, 1],
+            opacity: [0, 1],
+            easing: 'easeOutQuad',
+            duration: 1000
+        });
+    }
+
+    // Animación de Entrada de Tarjetas
+    const cards = document.querySelectorAll('.song-card');
+    cards.forEach((card, index) => {
+        anime({
+            targets: card,
+            translateY: [50, 0],
+            opacity: [0, 1],
+            delay: index * 200,
+            duration: 800,
+            easing: 'easeOutQuad'
+        });
+    });
+
+    // Animación al Pasar el Mouse sobre Tarjetas (Hover)
+    cards.forEach(card => {
+        card.addEventListener('mouseenter', function() {
+            anime({
+                targets: this,
+                scale: 1.05,
+                boxShadow: '0 8px 16px rgba(0, 0, 0, 0.3)',
+                easing: 'easeOutQuad',
+                duration: 300
+            });
+        });
+        card.addEventListener('mouseleave', function() {
+            anime({
+                targets: this,
+                scale: 1,
+                boxShadow: '0 2px 5px rgba(0, 0, 0, 0.1)',
+                easing: 'easeOutQuad',
+                duration: 300
+            });
+        });
+    });
+
+    // Carga Dinámica de Secciones
+    const sidebarLinks = document.querySelectorAll('.sidebar-link');
+    const contentDiv = document.getElementById('content');
+    sidebarLinks.forEach(link => {
+        link.addEventListener('click', async (e) => {
+            e.preventDefault();
+            const section = link.getAttribute('data-section');
+            const url = link.getAttribute('href');
+
+            // Animación de Salida del Contenido Actual
+            await anime({
+                targets: contentDiv,
+                opacity: [1, 0],
+                translateY: [0, 20],
+                duration: 300,
+                easing: 'easeInQuad'
+            }).finished;
+
+            try {
+                const response = await fetch(url);
+                if (!response.ok) {
+                    throw new Error(`Error ${response.status}: ${response.statusText}`);
+                }
+                const html = await response.text();
+                const parser = new DOMParser();
+                const doc = parser.parseFromString(html, 'text/html');
+                const newContent = doc.querySelector('#section-content');
+                if (newContent) {
+                    contentDiv.innerHTML = newContent.outerHTML;
+
+                    // Animación de Entrada del Nuevo Contenido
+                    anime({
+                        targets: contentDiv,
+                        opacity: [0, 1],
+                        translateY: [20, 0],
+                        duration: 500,
+                        easing: 'easeOutQuad'
+                    });
+
+                    // Reaplicar Animaciones a las Nuevas Tarjetas
+                    const newCards = contentDiv.querySelectorAll('.song-card');
+                    newCards.forEach((card, index) => {
+                        anime({
+                            targets: card,
+                            translateY: [50, 0],
+                            opacity: [0, 1],
+                            delay: index * 200,
+                            duration: 800,
+                            easing: 'easeOutQuad'
+                        });
+
+                        // Reaplicar Animaciones de Hover
+                        card.addEventListener('mouseenter', function() {
+                            anime({
+                                targets: this,
+                                scale: 1.05,
+                                boxShadow: '0 8px 16px rgba(0, 0, 0, 0.3)',
+                                easing: 'easeOutQuad',
+                                duration: 300
+                            });
+                        });
+                        card.addEventListener('mouseleave', function() {
+                            anime({
+                                targets: this,
+                                scale: 1,
+                                boxShadow: '0 2px 5px rgba(0, 0, 0, 0.1)',
+                                easing: 'easeOutQuad',
+                                duration: 300
+                            });
+                        });
+                    });
+
+                    // Reaplicar el Listener de Búsqueda si Estamos en la Sección de Gestionar Playlist
+                    initializeSearchListener();
+                } else {
+                    contentDiv.innerHTML = '<p>Error al cargar el contenido.</p>';
+                }
+            } catch (error) {
+                console.error('Error al cargar la sección:', error);
+                contentDiv.innerHTML = `<p>Error al cargar el contenido: ${error.message}. Por favor, intenta de nuevo más tarde.</p>`;
+            }
+        });
+    });
+
+    // Función para Inicializar el Listener de Búsqueda
+    function initializeSearchListener() {
+        const adminSearchInput = document.getElementById('admin-search-input');
+        const adminSearchResults = document.getElementById('admin-search-results');
+        const adminPlaylistSongs = document.getElementById('admin-playlist-songs');
+
+        // Listener para el buscador en la sección "Gestionar Playlist"
+        if (adminSearchInput && adminSearchResults) {
+            adminSearchInput.addEventListener('input', async () => {
+                const query = adminSearchInput.value.trim();
+                if (query.length < 3) {
+                    adminSearchResults.innerHTML = '';
+                    return;
+                }
+
+                try {
+                    const response = await fetch(`/search_songs?query=${encodeURIComponent(query)}`);
+                    if (!response.ok) {
+                        throw new Error('Error en la búsqueda de canciones');
+                    }
+                    const songs = await response.json();
+                    adminSearchResults.innerHTML = '';
+
+                    songs.forEach(song => {
+                        const songCard = document.createElement('div');
+                        songCard.className = 'bg-gray-700 p-4 rounded-lg flex items-center justify-between';
+                        songCard.innerHTML = `
+                            <div>
+                                <p class="text-white">${song.title} - ${song.artist}</p>
+                            </div>
+                            <button class="add-song bg-green-500 text-white py-1 px-2 rounded hover:bg-green-600 transition" data-uri="${song.uri}" data-title="${song.title}" data-artist="${song.artist}" data-image-url="${song.image_url || 'https://picsum.photos/50/50?random=1'}">Agregar</button>
+                        `;
+                        adminSearchResults.appendChild(songCard);
+                    });
+
+                    // Añadir Listeners a los Botones de Agregar
+                    document.querySelectorAll('.add-song').forEach(button => {
+                        button.addEventListener('click', async () => {
+                            const uri = button.getAttribute('data-uri');
+                            const title = button.getAttribute('data-title');
+                            const artist = button.getAttribute('data-artist');
+                            const imageUrl = button.getAttribute('data-image-url');
+
+                            try {
+                                const response = await fetch('/admin_manage_playlist', {
+                                    method: 'POST',
+                                    headers: {
+                                        'Content-Type': 'application/x-www-form-urlencoded',
+                                    },
+                                    body: `action=add&song_uri=${encodeURIComponent(uri)}`
+                                });
+                                const result = await response.json();
+                                if (result.success) {
+                                    const songItem = document.createElement('div');
+                                    songItem.className = 'bg-gray-700 p-4 rounded-lg flex items-center justify-between song-item';
+                                    songItem.setAttribute('data-uri', uri);
+                                    songItem.innerHTML = `
+                                        <div>
+                                            <p class="text-white">${title} - ${artist}</p>
+                                        </div>
+                                        <div>
+                                            <button class="play-button bg-green-500 text-white py-1 px-2 rounded hover:bg-green-600 transition mr-2" data-uri="${uri}" data-title="${title}" data-artist="${artist}" data-image-url="${imageUrl}">Reproducir</button>
+                                            <button class="remove-song bg-red-500 text-white py-1 px-2 rounded hover:bg-red-600 transition" data-uri="${uri}">Eliminar</button>
+                                        </div>
+                                    `;
+                                    adminPlaylistSongs.appendChild(songItem);
+                                    alert(result.message);
+
+                                    // Añadir Listener al Botón de Reproducir en la Playlist
+                                    songItem.querySelector('.play-button').addEventListener('click', () => {
+                                        playSong(uri, title, artist, imageUrl);
+                                    });
+                                } else {
+                                    alert(result.error);
+                                }
+                            } catch (error) {
+                                console.error('Error al agregar canción:', error);
+                                alert('Error al agregar la canción');
+                            }
+                        });
+                    });
+                } catch (error) {
+                    console.error('Error al buscar canciones:', error);
+                    adminSearchResults.innerHTML = '<p class="text-red-500">Error al buscar canciones.</p>';
+                }
+            });
+        }
+
+        // Añadir Listener para Reproducir Toda la Playlist
+        const playPlaylistBtn = document.getElementById('play-playlist-btn');
+        if (playPlaylistBtn && adminPlaylistSongs) {
+            playPlaylistBtn.addEventListener('click', () => {
+                const songs = adminPlaylistSongs.querySelectorAll('.song-item');
+                if (songs.length === 0) {
+                    alert('La playlist está vacía.');
+                    return;
+                }
+
+                const uris = [];
+                songs.forEach(song => {
+                    const uri = song.getAttribute('data-uri');
+                    const title = song.querySelector('p').textContent.split(' - ')[0];
+                    const artist = song.querySelector('p').textContent.split(' - ')[1];
+                    const imageUrl = song.querySelector('.play-button').getAttribute('data-image-url');
+                    uris.push({ uri, title, artist, imageUrl });
+                });
+
+                playPlaylist(uris);
+            });
+        }
+
+        // Añadir Listeners a los Botones de Eliminar y Reproducir
+        if (adminPlaylistSongs) {
+            adminPlaylistSongs.addEventListener('click', async (e) => {
+                if (e.target.classList.contains('remove-song')) {
+                    const uri = e.target.getAttribute('data-uri');
+                    try {
+                        const response = await fetch('/admin_manage_playlist', {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/x-www-form-urlencoded',
+                            },
+                            body: `action=remove&song_uri=${encodeURIComponent(uri)}`
+                        });
+                        const result = await response.json();
+                        if (result.success) {
+                            e.target.parentElement.parentElement.remove();
+                            alert(result.message);
+                        } else {
+                            alert(result.error);
+                        }
+                    } catch (error) {
+                        console.error('Error al eliminar canción:', error);
+                        alert('Error al eliminar la canción');
+                    }
+                } else if (e.target.classList.contains('play-button')) {
+                    const uri = e.target.getAttribute('data-uri');
+                    const title = e.target.getAttribute('data-title');
+                    const artist = e.target.getAttribute('data-artist');
+                    const imageUrl = e.target.getAttribute('data-image-url');
+                    playSong(uri, title, artist, imageUrl);
+                }
+            });
+        }
+    }
+
+    // Inicializar el Listener de Búsqueda al Cargar la Página
+    initializeSearchListener();
+
+    // Manejo del Interruptor de Tema
+    const themeSwitch = document.getElementById('theme-switch');
+    const htmlElement = document.documentElement;
+    const bodyElement = document.body;
+    themeSwitch.addEventListener('change', () => {
+        if (themeSwitch.checked) {
+            htmlElement.classList.remove('light-theme');
+            htmlElement.classList.add('dark-theme');
+            bodyElement.classList.remove('light-theme');
+            bodyElement.classList.add('dark-theme');
+            localStorage.setItem('theme', 'dark');
+        } else {
+            htmlElement.classList.remove('dark-theme');
+            htmlElement.classList.add('light-theme');
+            bodyElement.classList.remove('dark-theme');
+            bodyElement.classList.add('light-theme');
+            localStorage.setItem('theme', 'light');
+        }
+    });
+
+    // Cargar el Tema Guardado
+    const savedTheme = localStorage.getItem('theme');
+    if (savedTheme === 'dark') {
+        htmlElement.classList.add('dark-theme');
+        bodyElement.classList.add('dark-theme');
+        themeSwitch.checked = true;
+    } else {
+        htmlElement.classList.add('light-theme');
+        bodyElement.classList.add('light-theme');
+    }
+
+    // Manejo del Reproductor Retráctil (Iframe)
+    document.addEventListener('DOMContentLoaded', () => {
+        const playerIframe = document.getElementById('player-iframe');
+        if (playerIframe) {
+            playerIframe.contentWindow.spotifyToken = '{{ session.spotify_token | safe }}';
+        }
+
+        const playerToggle = document.getElementById('player-toggle');
+        let isPlayerHidden = true;
+
+        playerToggle.addEventListener('click', () => {
+            isPlayerHidden = !isPlayerHidden;
+            anime({
+                targets: '#player-iframe',
+                translateY: isPlayerHidden ? '100%' : '0%',
+                duration: 300,
+                easing: 'easeOutQuad'
+            });
+            playerToggle.textContent = isPlayerHidden ? '🎵' : '🔽';
+        });
+
+        // Manejo de mensajes desde el reproductor
+        window.addEventListener('message', (event) => {
+            if (event.data.type === 'notification') {
+                showNotification(event.data.message, event.data.notificationType);
+            } else if (event.data.type === 'requestToken') {
+                playerIframe.contentWindow.postMessage({
+                    type: 'initPlayer',
+                    spotifyToken: '{{ session.spotify_token | safe }}'
+                }, '*');
+            } else if (event.data.type === 'playerState') {
+                const { isPlaying, track, position, duration } = event.data;
+                console.log('Estado del reproductor:', { isPlaying, track, position, duration });
+            } else if (event.data.type === 'updateQueue') {
+                trackQueue = event.data.queue;
+                currentIndex = event.data.currentIndex;
+            }
+        });
+    });
+
+    // Enviar una Canción al Reproductor
+    async function playSong(uri, title, artist, image_url) {
+        trackQueue = [uri];
+        currentIndex = 0;
+        playerIframe.contentWindow.postMessage({
+            type: 'playTrack',
+            uri: uri,
+            title: title,
+            artist: artist,
+            image_url: image_url
+        }, '*');
+
+        // Registrar la canción en el historial de escucha
+        try {
+            await fetch('/log_listening', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    song_uri: uri,
+                    song_title: title,
+                    song_artist: artist
+                })
+            });
+        } catch (error) {
+            console.error('Error al registrar la canción en el historial:', error);
+        }
+    }
+
+    // Reproducir una Playlist Completa
+    async function playPlaylist(songs) {
+        trackQueue = songs.map(song => song.uri);
+        currentIndex = 0;
+        playerIframe.contentWindow.postMessage({
+            type: 'playPlaylist',
+            songs: songs
+        }, '*');
+
+        // Registrar las canciones en el historial de escucha
+        try {
+            for (const song of songs) {
+                await fetch('/log_listening', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        song_uri: song.uri,
+                        song_title: song.title,
+                        song_artist: song.artist
+                    })
+                });
+            }
+        } catch (error) {
+            console.error('Error al registrar las canciones en el historial:', error);
+        }
+    }
+</script>
+{% endblock %}

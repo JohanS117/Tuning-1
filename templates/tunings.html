@@ -8,15 +8,13 @@
     <script src="https://cdn.jsdelivr.net/npm/animejs/lib/anime.min.js"></script>
 {% endblock %}
 {% block content %}
-
 <section class="preview-songs py-12">
-    <div class="container mx-auto">
-        <section class="hero bg-gray-100 dark:bg-gray-800 py-12 pt-24">
-            <div class="container mx-auto text-center">
-                <h1 class="text-4xl font-bold mb-4 title">♫ TUNING 👽</h1>
-                <p class="text-lg mb-6">Descubre y disfruta de tu música favorita con nosotros.</p>
-            </div>
-        </section>
+    <section class="hero bg-gray-100 dark:bg-gray-800 py-12 pt-24">
+        <div class="container mx-auto text-center">
+            <h1 class="text-4xl font-bold mb-4 title">♫ TUNING 👽</h1>
+            <p class="text-lg mb-6">Descubre y disfruta de tu música favorita.</p>
+        </div>
+    </section>
         <div class="relative tunings-container">
             <!-- Botón Izquierdo -->
             <button class="nav-arrow prev absolute top-1/2 left-0 transform -translate-y-1/2 bg-black bg-opacity-50 p-3 rounded-full text-2xl z-10 hover:bg-opacity-75 transition-all duration-300">←</button>
@@ -40,7 +38,7 @@
                                 <div class="description-bg bg-gray-600 p-4 rounded-md">
                                     <p class="text-sm text-gray-200">
                                         {% if song.title == "Stairway to Heaven" %}
-                                        Stairway to Heaven hace que te sientas motivado, elevando tu dopamina y teniendo citocinas, necesarias para tu equilibrio emocional. Mueve tu cabeza, siente y baila al ritmo del rock, conectando con el sentimiento de la letra y, sobre todo, disfruta del momento en que sintonizas esta canción que te da vida o más vida.
+                                        Stairway to Heaven hace que te sientas motivado, liberando y elevando dopamina y oxitocinas, necesarias para tu equilibrio emocional. Mueve tu cabeza, siente y baila al ritmo del rock, conectando con el sentimiento de la letra y, sobre todo, disfruta del momento en que sintonizas esta canción que te da cada vez más vida.
                                         {% elif song.title == "Bohemian Rhapsody" %}
                                         Bohemian Rhapsody te lleva a un viaje emocional, fusionando ópera y rock en una explosión creativa. Siente la intensidad de cada nota, déjate llevar por su narrativa y encuentra paz en su armonía caótica.
                                         {% elif song.title == "Sweet Child O' Mine" %}
@@ -70,11 +68,11 @@
 <section class="hero bg-gray-100 dark:bg-gray-800 py-12">
     <div class="container mx-auto text-center">
         <div class="subti mb-6">
-            <button class="boton-subti bg-blue-200 text-black font-bold py-3 px-6 rounded-2xl hover:bg-green-200 transition-all duration-300 font-pacifico">
+            <button class="boton-subti bg-blue-200 text-black font-bold py-3 px-6 rounded-2xl hover:bg-green-200 transition-all duration-300 font-semibold">
                 <p>◘ SINTONIZA EL SONIDO DE TÚ VIDA ◘</p>
             </button>
+            <br>
         </div>
-        <p class="text-lg mb-6">Descubre y disfruta de tu música favorita con nosotros.</p>
         <div class="flex justify-center gap-4">
             <a href="{{ url_for('login') }}" class="btn-session bg-blue-500 text-white py-2 px-4 rounded hover:bg-blue-600 transition">Iniciar Sesión</a>
             <a href="{{ url_for('register') }}" class="btn-register bg-green-500 text-white py-2 px-4 rounded hover:bg-green-600 transition">Registrarse</a>
@@ -104,18 +102,16 @@
                 carousel.style.transform = `translateX(-${currentIndex * 100}%)`;
             }
 
-            // Función para pausar todas las canciones simulando un clic en el botón del iframe
+            // Función para pausar todas las canciones enviando un mensaje al iframe
             function pauseAll() {
                 items.forEach((item, index) => {
                     const iframe = item.querySelector('iframe');
                     if (iframe) {
-                        const playPauseButton = iframe.contentDocument?.querySelector('[data-testid="play-pause-button"]');
-                        if (playPauseButton && playbackStates[index]) {
-                            playPauseButton.click();
-                            const playButton = item.querySelector('.play-button');
-                            if (playButton) playButton.textContent = '►';
-                            playbackStates[index] = false;
-                        }
+                        iframe.contentWindow.postMessage('{"command":"pause"}', 'https://open.spotify.com');
+                        const playButton = item.querySelector('.play-button');
+                        if (playButton) playButton.textContent = '►';
+                        playbackStates[index] = false;
+                        console.log(`Pausando canción en índice ${index}`);
                     }
                 });
             }
@@ -139,7 +135,7 @@
             prevButton.addEventListener('click', goToPrev);
 
             // Iniciar el carrusel automáticamente
-            setInterval(goToNext, 40000);
+            setInterval(goToNext, 35000);
 
             // Actualizar el carrusel al redimensionar la ventana
             window.addEventListener('resize', updateCarousel);
@@ -159,51 +155,46 @@
 
                     const iframe = button.closest('.carousel-item').querySelector('iframe');
                     if (iframe) {
-                        // Esperar a que el iframe esté completamente cargado
-                        iframe.addEventListener('load', () => {
-                            const playPauseButton = iframe.contentDocument?.querySelector('[data-testid="play-pause-button"]');
-                            if (playPauseButton) {
-                                playPauseButton.click();
-                                playbackStates[index] = !playbackStates[index];
-                                button.textContent = playbackStates[index] ? '❚❚' : '►';
-                                console.log(`Clic simulado en el botón de reproducción/pausa en índice ${index}, estado: ${playbackStates[index] ? 'reproduciendo' : 'pausado'}`);
+                        if (playbackStates[index]) {
+                            // Pausar
+                            iframe.contentWindow.postMessage('{"command":"pause"}', 'https://open.spotify.com');
+                            button.textContent = '►';
+                            playbackStates[index] = false;
+                            console.log(`Pausando canción en índice ${index}`);
 
-                                // Enviar mensaje al padre para que main.js lo maneje
-                                window.parent.postMessage({
-                                    type: 'playTrack',
-                                    uri: iframe.src.split('/track/')[1],
-                                    title: items[index].querySelector('h3').textContent,
-                                    artist: items[index].querySelector('p').textContent
-                                }, '*');
-                            } else {
-                                console.error(`No se encontró el botón de reproducción/pausa en el iframe en índice ${index}`);
-                            }
-                        });
+                            // Enviar mensaje al padre para que main.js lo maneje
+                            window.parent.postMessage({
+                                type: 'playTrack',
+                                uri: iframe.src.split('/track/')[1],
+                                title: items[index].querySelector('h3').textContent,
+                                artist: items[index].querySelector('p').textContent
+                            }, '*');
+                        } else {
+                            // Reproducir
+                            iframe.contentWindow.postMessage('{"command":"play"}', 'https://open.spotify.com');
+                            button.textContent = '❚❚';
+                            playbackStates[index] = true;
+                            console.log(`Reproduciendo canción en índice ${index}`);
 
-                        // Forzar la ejecución si el iframe ya está cargado
-                        if (iframe.contentDocument?.readyState === 'complete') {
-                            const playPauseButton = iframe.contentDocument?.querySelector('[data-testid="play-pause-button"]');
-                            if (playPauseButton) {
-                                playPauseButton.click();
-                                playbackStates[index] = !playbackStates[index];
-                                button.textContent = playbackStates[index] ? '❚❚' : '►';
-                                console.log(`Clic simulado en el botón de reproducción/pausa en índice ${index}, estado: ${playbackStates[index] ? 'reproduciendo' : 'pausado'}`);
-
-                                // Enviar mensaje al padre para que main.js lo maneje
-                                window.parent.postMessage({
-                                    type: 'playTrack',
-                                    uri: iframe.src.split('/track/')[1],
-                                    title: items[index].querySelector('h3').textContent,
-                                    artist: items[index].querySelector('p').textContent
-                                }, '*');
-                            } else {
-                                console.error(`No se encontró el botón de reproducción/pausa en el iframe en índice ${index}`);
-                            }
+                            // Enviar mensaje al padre para que main.js lo maneje
+                            window.parent.postMessage({
+                                type: 'playTrack',
+                                uri: iframe.src.split('/track/')[1],
+                                title: items[index].querySelector('h3').textContent,
+                                artist: items[index].querySelector('p').textContent
+                            }, '*');
                         }
                     } else {
                         console.error(`No se encontró iframe para el botón en índice ${index}`);
                     }
                 });
+            });
+
+            // Escuchar mensajes del iframe para depuración (opcional)
+            window.addEventListener('message', (event) => {
+                if (event.origin === 'https://open.spotify.com') {
+                    console.log('Mensaje recibido del iframe de Spotify:', event.data);
+                }
             });
 
             // Animaciones con Anime.js

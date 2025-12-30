@@ -7,13 +7,14 @@
             <p class="text-red-500 text-center mb-4">{{ error }}</p>
         {% endif %}
         <form method="POST" action="/login">
+            {{ form.hidden_tag() }} <!-- Esto incluye el token CSRF automáticamente -->
             <div class="mb-4">
                 <label for="email" class="block text-sm font-medium mb-2">Correo Electrónico</label>
-                <input type="email" id="email" name="email" class="w-full p-2 border rounded dark:bg-gray-700 dark:border-gray-600 dark:text-white" required>
+                {{ form.email(class="w-full p-2 border rounded dark:bg-gray-700 dark:border-gray-600 dark:text-white", required="required") }}
             </div>
             <div class="mb-6">
                 <label for="password" class="block text-sm font-medium mb-2">Contraseña</label>
-                <input type="password" id="password" name="password" class="w-full p-2 border rounded dark:bg-gray-700 dark:border-gray-600 dark:text-white" required>
+                {{ form.password(class="w-full p-2 border rounded dark:bg-gray-700 dark:border-gray-600 dark:text-white", required="required") }}
             </div>
             <button type="submit" class="w-full bg-blue-500 text-white py-2 rounded hover:bg-blue-600 transition">Iniciar Sesión</button>
         </form>

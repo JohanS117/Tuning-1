@@ -1,0 +1,86 @@
+{% extends 'base.html' %}
+{% block title %}Tuning - Comandos de Voz{% endblock %}
+{% block content %}
+<div class="p-6">
+    <h1 class="text-3xl font-bold mb-6">Comandos de Voz</h1>
+    <p class="text-gray-700 dark:text-gray-300 mb-4">Usa comandos de voz para gestionar tu perfil o canciones. Ejemplos: "editar biografía", "subir canción".</p>
+
+    <div class="bg-white dark:bg-gray-800 p-4 rounded-lg shadow mb-6">
+        <button id="start-voice" class="bg-blue-500 text-white py-2 px-4 rounded hover:bg-blue-600">Iniciar Reconocimiento</button>
+        <button id="stop-voice" class="bg-red-500 text-white py-2 px-4 rounded hover:bg-red-600 hidden">Detener Reconocimiento</button>
+        <p id="transcript" class="text-gray-700 dark:text-gray-300 mt-4">Transcripción: <span id="transcript-text">Esperando comando...</span></p>
+        <p id="status" class="text-gray-500 dark:text-gray-400 mt-2">Estado: Inactivo</p>
+    </div>
+</div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', () => {
+        const startButton = document.getElementById('start-voice');
+        const stopButton = document.getElementById('stop-voice');
+        const transcriptText = document.getElementById('transcript-text');
+        const statusText = document.getElementById('status');
+
+        const recognition = new (window.SpeechRecognition || window.webkitSpeechRecognition)();
+        recognition.lang = '{{ session.user_language or "es-ES" }}'; // Usar el idioma del usuario
+        recognition.interimResults = false;
+        recognition.maxAlternatives = 1;
+
+        startButton.addEventListener('click', () => {
+            recognition.start();
+            startButton.classList.add('hidden');
+            stopButton.classList.remove('hidden');
+            statusText.textContent = 'Estado: Escuchando...';
+        });
+
+        stopButton.addEventListener('click', () => {
+            recognition.stop();
+            startButton.classList.remove('hidden');
+            stopButton.classList.add('hidden');
+            statusText.textContent = 'Estado: Inactivo';
+        });
+
+        recognition.onresult = (event) => {
+            const transcript = event.results[0][0].transcript.toLowerCase();
+            transcriptText.textContent = transcript;
+
+            // Enviar el comando al backend
+            fetch('/voice-command', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ command: transcript })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    // Redirigir según la acción
+                    if (data.action === 'edit_profile') {
+                        window.location.href = '{{ url_for("artist_edit_profile") }}';
+                    } else if (data.action === 'upload_song') {
+                        window.location.href = '{{ url_for("artist_upload_song") }}';
+                    }
+                } else {
+                    transcriptText.textContent += ' (Comando no reconocido)';
+                }
+            })
+            .catch(error => {
+                console.error('Error al procesar el comando:', error);
+                transcriptText.textContent += ' (Error al procesar el comando)';
+            });
+        };
+
+        recognition.onerror = (event) => {
+            statusText.textContent = `Estado: Error - ${event.error}`;
+            startButton.classList.remove('hidden');
+            stopButton.classList.add('hidden');
+        };
+
+        recognition.onend = () => {
+            startButton.classList.remove('hidden');
+            stopButton.classList.add('hidden');
+            statusText.textContent = 'Estado: Inactivo';
+        };
+    });
+</script>
+{% endblock %}

@@ -1,0 +1,29 @@
+{% extends 'base.html' %}
+{% block title %}Tuning - Editar Noticia{% endblock %}
+{% block content %}
+<div class="p-6">
+    <h1 class="text-3xl font-bold mb-6">Editar Noticia</h1>
+    <form method="POST" class="space-y-4" id="edit-news-form">
+        <div>
+            <label for="title" class="block text-gray-700 dark:text-gray-300">Título</label>
+            <input type="text" name="title" id="title" value="{{ news_item.title }}" class="w-full p-2 border rounded dark:bg-gray-700 dark:border-gray-600 dark:text-white" required>
+        </div>
+        <div>
+            <label for="content" class="block text-gray-700 dark:text-gray-300">Contenido</label>
+            <textarea name="content" id="content" rows="4" class="w-full p-2 border rounded dark:bg-gray-700 dark:border-gray-600 dark:text-white" required>{{ news_item.content }}</textarea>
+        </div>
+        <button type="submit" class="bg-blue-500 text-white py-2 px-4 rounded hover:bg-blue-600">Guardar Cambios</button>
+    </form>
+</div>
+
+<script>
+    document.getElementById('edit-news-form').addEventListener('submit', function(event) {
+        const title = document.getElementById('title').value.trim();
+        const content = document.getElementById('content').value.trim();
+        if (!title || !content) {
+            event.preventDefault();
+            alert('Por favor, completa todos los campos.');
+        }
+    });
+</script>
+{% endblock %}

@@ -1,0 +1,36 @@
+{% extends 'base.html' %}
+{% block title %}Tuning - Tendencias{% endblock %}
+{% block content %}
+<div class="p-6">
+    <h1 class="text-3xl font-bold mb-6">Tendencias</h1>
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+        <!-- Géneros Populares -->
+        <div class="bg-white dark:bg-gray-800 p-4 rounded-lg shadow">
+            <h2 class="text-2xl font-semibold mb-4">Géneros Populares</h2>
+            <ul class="space-y-2">
+                {% for genre in trends.top_genres %}
+                <li class="text-gray-700 dark:text-gray-300">{{ genre }}</li>
+                {% endfor %}
+            </ul>
+        </div>
+        <!-- Artistas Populares -->
+        <div class="bg-white dark:bg-gray-800 p-4 rounded-lg shadow">
+            <h2 class="text-2xl font-semibold mb-4">Artistas Populares</h2>
+            <ul class="space-y-2">
+                {% for artist in trends.top_artists %}
+                <li class="text-gray-700 dark:text-gray-300">{{ artist }}</li>
+                {% endfor %}
+            </ul>
+        </div>
+        <!-- Canciones Populares -->
+        <div class="bg-white dark:bg-gray-800 p-4 rounded-lg shadow">
+            <h2 class="text-2xl font-semibold mb-4">Canciones Populares</h2>
+            <ul class="space-y-2">
+                {% for song in trends.top_songs %}
+                <li class="text-gray-700 dark:text-gray-300">{{ song.title }} - {{ song.artist }}</li>
+                {% endfor %}
+            </ul>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,64 @@
+{% extends 'base.html' %}
+{% block title %}Tuning - Recomendaciones{% endblock %}
+{% block content %}
+<main class="container mx-auto px-4 py-6 pt-24">
+    <h1 class="text-3xl font-bold mb-6">Recomendaciones para Ti</h1>
+    {% if error %}
+        <p class="text-red-500 mb-4">{{ error }}</p>
+    {% endif %}
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        {% for track in recommendations %}
+            <div class="bg-gray-700 p-4 rounded-lg flex items-center justify-between song-card">
+                <div>
+                    <p class="text-white">{{ track.title }} - {{ track.artist }}</p>
+                </div>
+                <button class="play-button bg-green-500 text-white py-1 px-2 rounded hover:bg-green-600 transition" data-uri="{{ track.uri }}" data-title="{{ track.title }}" data-artist="{{ track.artist }}" data-image-url="{{ track.image_url }}">Reproducir</button>
+            </div>
+        {% else %}
+            <p class="text-gray-600 dark:text-gray-300">No hay recomendaciones disponibles.</p>
+        {% endfor %}
+    </div>
+</main>
+
+<script>
+    // Añadir Listeners a los Botones de Reproducir
+    document.querySelectorAll('.play-button').forEach(button => {
+        button.addEventListener('click', () => {
+            const uri = button.getAttribute('data-uri');
+            const title = button.getAttribute('data-title');
+            const artist = button.getAttribute('data-artist');
+            const imageUrl = button.getAttribute('data-image-url');
+            playSong(uri, title, artist, imageUrl);
+        });
+    });
+
+    // Enviar una Canción al Reproductor
+    async function playSong(uri, title, artist, image_url) {
+        const playerIframe = document.getElementById('player-iframe');
+        if (playerIframe) {
+            playerIframe.contentWindow.postMessage({
+                type: 'playTrack',
+                uri: uri,
+                title: title,
+                artist: artist,
+                image_url: image_url
+            }, '*');
+
+            // Registrar la canción en el historial de escucha
+            try {
+                await fetch('/log_listening', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        song_uri: uri,
+                        song_title: title,
+                        song_artist: artist
+                    })
+                });
+            } catch (error) {
+                console.error('Error al registrar la canción en el historial:', error);
+            }
+        }
+    }
+</script>
+{% endblock %}

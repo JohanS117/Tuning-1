@@ -1,0 +1,24 @@
+```html
+{% extends 'base.html' %}
+{% block title %}Tuning - Editar Perfil de Artista{% endblock %}
+{% block content %}
+<div class="p-6">
+    <h1 class="text-3xl font-bold mb-6">Editar Perfil de Artista</h1>
+
+    {% if error %}
+    <div class="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative mb-4">
+        {{ error }}
+    </div>
+    {% endif %}
+
+    <form method="POST" class="space-y-4">
+        {{ form.hidden_tag() }}
+        <div>
+            <label for="bio" class="block text-gray-700 dark:text-gray-300">Biografía</label>
+            <textarea name="bio" id="bio" rows="4" class="w-full p-2 border rounded dark:bg-gray-700 dark:border-gray-600 dark:text-white">{{ form.bio.data or '' }}</textarea>
+        </div>
+        <button type="submit" class="bg-blue-500 text-white py-2 px-4 rounded hover:bg-blue-600">Guardar</button>
+    </form>
+</div>
+{% endblock %}
+```

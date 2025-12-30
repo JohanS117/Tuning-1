@@ -11,25 +11,57 @@
     </div>
     {% endif %}
 
-    <form method="POST" action="/register">
-        <div class="mb-4">
-            <label for="email" class="block text-sm font-medium mb-2">Correo Electrónico</label>
-            <input type="email" id="email" name="email" class="w-full p-2 border rounded dark:bg-gray-700 dark:border-gray-600 dark:text-white" required>
-        </div>
-        <div class="mb-4">
-            <label for="name" class="block text-sm font-medium mb-2">Nombre</label>
-            <input type="text" id="name" name="name" class="w-full p-2 border rounded dark:bg-gray-700 dark:border-gray-600 dark:text-white"  placeholder="░ Ingresar nombre y apellido •" required>
-        </div>
-        <div class="mb-4">
-            <label for="music_genre" class="block text-sm font-medium mb-2">Género Musical Favorito</label>
-            <input type="text" id="music_genre" name="music_genre" class="w-full p-2 border rounded dark:bg-gray-700 dark:border-gray-600 dark:text-white" placeholder="♪ Ejemplo: Rock, Pop, Jazz...">
-        </div>
-        <div class="mb-6">
-            <label for="password" class="block text-sm font-medium mb-2">Contraseña</label>
-            <input type="password" id="password" name="password" class="w-full p-2 border rounded dark:bg-gray-700 dark:border-gray-600 dark:text-white" required>
-        </div>
-        <button type="submit" class="w-full bg-green-500 text-white py-2 rounded hover:bg-green-600 transition">Registrarse</button>
-    </form>
+    <form method="POST" action="{{ url_for('register') }}" enctype="multipart/form-data">
+    {{ form.hidden_tag() }}
+    <div class="mb-4">
+        <label for="email" class="block text-gray-700">Correo Electrónico</label>
+        {{ form.email(class="w-full p-2 border rounded") }}
+        {% if form.email.errors %}
+            <span class="text-red-500">{{ form.email.errors[0] }}</span>
+        {% endif %}
+    </div>
+    <div class="mb-4">
+        <label for="name" class="block text-gray-700">Nombre</label>
+        {{ form.name(class="w-full p-2 border rounded") }}
+        {% if form.name.errors %}
+            <span class="text-red-500">{{ form.name.errors[0] }}</span>
+        {% endif %}
+    </div>
+    <div class="mb-4">
+        <label for="music_genre" class="block text-gray-700">Género Musical Favorito</label>
+        {{ form.music_genre(class="w-full p-2 border rounded") }}
+        {% if form.music_genre.errors %}
+            <span class="text-red-500">{{ form.music_genre.errors[0] }}</span>
+        {% endif %}
+    </div>
+    <div class="mb-4">
+        <label for="language" class="block text-gray-700">Idioma</label>
+        {{ form.language(class="w-full p-2 border rounded") }}
+        {% if form.language.errors %}
+            <span class="text-red-500">{{ form.language.errors[0] }}</span>
+        {% endif %}
+    </div>
+    <div class="mb-4">
+        <label for="password" class="block text-gray-700">Contraseña</label>
+        {{ form.password(class="w-full p-2 border rounded") }}
+        {% if form.password.errors %}
+            <span class="text-red-500">{{ form.password.errors[0] }}</span>
+        {% endif %}
+    </div>
+    <div class="mb-4">
+        <label for="voice_sample" class="block text-gray-700">Muestra de Voz (graba tu voz diciendo "Hola, soy [tu nombre]")</label>
+        {{ form.voice_sample(class="w-full p-2 border rounded") }}
+        {% if form.voice_sample.errors %}
+            <span class="text-red-500">{{ form.voice_sample.errors[0] }}</span>
+        {% endif %}
+    </div>
+    <div class="mb-4">
+        {{ form.submit(class="bg-blue-500 text-white py-2 px-4 rounded hover:bg-blue-600 transition") }}
+    </div>
+    {% if error %}
+        <p class="text-red-500">{{ error }}</p>
+    {% endif %}
+</form>
 
     <p class="text-center mt-4">¿Ya tienes una cuenta? <a href="/login" class="text-blue-500 hover:underline">Inicia Sesión</a></p>
 </section>
