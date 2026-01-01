@@ -11,7 +11,7 @@ export default [
                 ...globals.browser,
                 Spotify: "readonly"  // Agrega Spotify como variable global
             },
-            ecmaVersion: 2021,  // Equivalente a es2021
+            ecmaVersion: 2021,
             sourceType: "module"
         },
         rules: {
