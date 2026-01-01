@@ -1,1 +1,15 @@
 /.env
+# Modelos Vosk (pesados, descargar en runtime o manual)
+models/
+vosk-model*/
+*/vosk-model*/
+
+# Dependencias Node (nunca se suben a Git)
+node_modules/
+package-lock.json  # Opcional, pero yarn.lock si usas yarn
+
+# Logs y cachés
+app.log*
+__pycache__/
+.venv/
+*.fst  # Si solo quieres ignorar archivos específicos grandes
